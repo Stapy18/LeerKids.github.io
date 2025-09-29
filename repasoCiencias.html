@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Estados de la Materia — Kids (Tailwind + Universal DnD)</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              bg: "#f6f9ff",
+              ink: "#1a1f36",
+              "ink-soft": "#3b4666",
+              solid: "#6c63ff",
+              liquid: "#00bfa6",
+              gas: "#ff7a59",
+            },
+            boxShadow: { soft: "0 10px 25px -10px rgba(31,41,55,.15)" },
+            keyframes: {
+              wiggle: {
+                "0%,100%": { transform: "translate(0,0)" },
+                "50%": { transform: "translate(6px,-6px)" },
+              },
+              floatMini: {
+                "0%": { transform: "translate(0,0)" },
+                "50%": { transform: "translate(10px,-8px)" },
+                "100%": { transform: "translate(0,0)" },
+              },
+              shake: {
+                "0%": { transform: "translateX(0)" },
+                "25%": { transform: "translateX(-6px)" },
+                "50%": { transform: "translateX(6px)" },
+                "75%": { transform: "translateX(-4px)" },
+                "100%": { transform: "translateX(0)" },
+              },
+            },
+            animation: {
+              wiggle: "wiggle 2.5s ease-in-out infinite",
+              floatMini: "floatMini 4.5s ease-in-out infinite",
+              shake: "shake .25s linear 1",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Interact.js -->
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
+    <style>
+      .dot,
+      .mini-dot {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 9999px;
+      }
+      .solid-dot,
+      .mini-solid {
+        background: #6c63ff;
+      }
+      .liquid-dot,
+      .mini-liquid {
+        background: #00bfa6;
+      }
+      .gas-dot {
+        background: #ff7a59;
+        animation: float 6s linear infinite;
+      }
+      @keyframes float {
+        0% {
+          transform: translate(-10px, 150px);
+        }
+        100% {
+          transform: translate(260px, -40px);
+        }
+      }
+
+      .mini {
+        position: relative;
+        width: 140px;
+        height: 90px;
+        overflow: hidden;
+      }
+      /* 🔧 FIX: color para los puntos de gas en el pareo */
+      .mini-gas {
+        background: #ff7a59;
+      }
+
+      .dragging {
+        opacity: 0.85;
+      }
+      .drop-highlight {
+        outline: 3px solid rgba(169, 184, 255, 0.9) !important;
+      }
+      .shake {
+        animation: shake 0.25s linear 1;
+      }
+      .item {
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body class="bg-bg text-ink antialiased">
+    <header class="sticky top-0 z-50 bg-white border-b border-indigo-100/60">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl grid place-items-center text-white font-black shadow-soft"
+          style="background: linear-gradient(135deg, #6c63ff, #00bfa6)"
+        >
+          EM
+        </div>
+        <h1 class="text-lg sm:text-xl font-extrabold">
+          Estados de la Materia — Aprende & Juega
+        </h1>
+        <label class="ml-auto flex items-center gap-2 font-bold text-sm"
+          ><input id="voiceToggle" type="checkbox" class="size-4" />
+          Audio</label
+        >
+      </div>
+    </header>
+
+    <div
+      class="max-w-6xl mx-auto px-4 py-4 grid lg:grid-cols-[240px_1fr] gap-4"
+    >
+      <nav
+        class="bg-white border border-indigo-100/60 rounded-2xl p-3 h-max lg:sticky lg:top-20"
+      >
+        <button
+          class="tab-btn w-full px-4 py-3 rounded-xl font-extrabold text-left bg-indigo-50 hover:bg-white border hover:border-indigo-100 active"
+          data-tab="tab-aprender"
+        >
+          Aprender
+        </button>
+        <button
+          class="tab-btn w-full px-4 py-3 rounded-xl font-extrabold text-left bg-indigo-50 hover:bg-white border hover:border-indigo-100 mt-2"
+          data-tab="tab-practicar"
+        >
+          Practicar
+        </button>
+        <button
+          class="tab-btn w-full px-4 py-3 rounded-xl font-extrabold text-left bg-indigo-50 hover:bg-white border hover:border-indigo-100 mt-2"
+          data-tab="tab-repaso"
+        >
+          Repaso
+        </button>
+        <button
+          class="tab-btn w-full px-4 py-3 rounded-xl font-extrabold text-left bg-indigo-50 hover:bg-white border hover:border-indigo-100 mt-2"
+          data-tab="tab-quiz"
+        >
+          Evaluación
+        </button>
+      </nav>
+
+      <main class="bg-white border border-indigo-100/60 rounded-2xl p-4">
+        <!-- APRENDER -->
+        <section id="tab-aprender" class="tab">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <article
+              class="p-4 border border-slate-100 rounded-2xl shadow-soft"
+            >
+              <span
+                class="inline-block px-3 py-1 rounded-full text-white text-xs font-black bg-solid"
+                >Sólido</span
+              >
+              <h3 class="font-extrabold mt-2">Forma y volumen fijos</h3>
+              <p class="text-ink-soft text-sm">
+                Partículas muy juntitas que solo vibran.
+              </p>
+              <div
+                id="demo-solido"
+                class="relative h-36 rounded-xl border border-indigo-200 border-dashed bg-gradient-to-b from-white to-indigo-50/50 overflow-hidden mt-2"
+              ></div>
+            </article>
+            <article
+              class="p-4 border border-slate-100 rounded-2xl shadow-soft"
+            >
+              <span
+                class="inline-block px-3 py-1 rounded-full text-white text-xs font-black bg-liquid"
+                >Líquido</span
+              >
+              <h3 class="font-extrabold mt-2">
+                Volumen fijo, forma del recipiente
+              </h3>
+              <p class="text-ink-soft text-sm">
+                Partículas cercanas que se deslizan.
+              </p>
+              <div
+                id="demo-liquido"
+                class="relative h-36 rounded-xl border border-indigo-200 border-dashed bg-gradient-to-b from-white to-indigo-50/50 overflow-hidden mt-2"
+              ></div>
+            </article>
+            <article
+              class="p-4 border border-slate-100 rounded-2xl shadow-soft"
+            >
+              <span
+                class="inline-block px-3 py-1 rounded-full text-white text-xs font-black bg-gas"
+                >Gaseoso</span
+              >
+              <h3 class="font-extrabold mt-2">Sin forma ni volumen fijos</h3>
+              <p class="text-ink-soft text-sm">
+                Partículas separadas y rápidas.
+              </p>
+              <div
+                id="demo-gas"
+                class="relative h-36 rounded-xl border border-indigo-200 border-dashed bg-gradient-to-b from-white to-indigo-50/50 overflow-hidden mt-2"
+              ></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- PRACTICAR -->
+        <section id="tab-practicar" class="tab hidden">
+          <p
+            id="touchHint"
+            class="text-indigo-700 font-semibold text-sm -mt-1 mb-3 hidden"
+          >
+            <b>Modo táctil:</b> puedes arrastrar o tocar y luego tocar la zona
+            para soltar.
+          </p>
+
+          <h2 class="text-xl font-black mb-2">
+            Juego 1: ¿A qué estado pertenece?
+          </h2>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div
+              id="bank-1"
+              class="bank bg-indigo-50/50 border border-indigo-100/70 rounded-2xl p-3 min-h-40"
+            >
+              <div
+                class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="sólido"
+              >
+                🪑 mesa
+              </div>
+              <div
+                class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="líquido"
+              >
+                💧 gota de agua
+              </div>
+              <div
+                class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="gaseoso"
+              >
+                🎈 globo con helio
+              </div>
+              <div
+                class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="sólido"
+              >
+                🧊 cubo de hielo
+              </div>
+              <div
+                class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="líquido"
+              >
+                🥤 jugo
+              </div>
+              <div
+                class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="gaseoso"
+              >
+                🌫️ vapor
+              </div>
+            </div>
+            <div
+              class="targets bg-white border border-indigo-100 rounded-2xl p-3"
+            >
+              <div class="font-black text-solid mb-1">Sólidos</div>
+              <div
+                class="drop solid bg-indigo-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-24 mb-3"
+                data-accept="sólido"
+              ></div>
+              <div class="font-black text-liquid mb-1">Líquidos</div>
+              <div
+                class="drop liquid bg-emerald-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-24 mb-3"
+                data-accept="líquido"
+              ></div>
+              <div class="font-black text-gas mb-1">Gases</div>
+              <div
+                class="drop gas bg-orange-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-24"
+                data-accept="gaseoso"
+              ></div>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2 items-center">
+            <button
+              id="check-1"
+              class="px-4 py-2 rounded-xl bg-solid text-white font-black shadow-soft"
+            >
+              Revisar
+            </button>
+            <button
+              id="reset-1"
+              class="px-4 py-2 rounded-xl bg-white border border-indigo-100 font-black"
+            >
+              Reiniciar
+            </button>
+            <span id="res-1" class="font-black"></span>
+          </div>
+
+          <hr class="my-5" />
+
+          <h2 class="text-xl font-black mb-2">Juego 2: Pareo de partículas</h2>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div
+              id="bank-2"
+              class="bank bg-indigo-50/50 border border-indigo-100/70 rounded-2xl p-3 min-h-40"
+            >
+              <!-- Ítems con mini-diagramas -->
+              <div
+                class="item diagram inline-flex items-center gap-3 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="sólido"
+              >
+                <div
+                  class="mini rounded-xl border border-indigo-200 border-dashed bg-gradient-to-b from-white to-indigo-50/50"
+                  data-diagram="sólido"
+                ></div>
+                <span class="sr-only">sólido</span>
+              </div>
+              <div
+                class="item diagram inline-flex items-center gap-3 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="líquido"
+              >
+                <div
+                  class="mini rounded-xl border border-indigo-200 border-dashed bg-gradient-to-b from-white to-indigo-50/50"
+                  data-diagram="líquido"
+                ></div>
+                <span class="sr-only">líquido</span>
+              </div>
+              <div
+                class="item diagram inline-flex items-center gap-3 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                data-answer="gaseoso"
+              >
+                <div
+                  class="mini rounded-xl border border-indigo-200 border-dashed bg-gradient-to-b from-white to-indigo-50/50"
+                  data-diagram="gaseoso"
+                ></div>
+                <span class="sr-only">gaseoso</span>
+              </div>
+            </div>
+            <div
+              class="targets bg-white border border-indigo-100 rounded-2xl p-3"
+            >
+              <div class="font-black text-solid mb-1">
+                Partículas de los Sólidos
+              </div>
+              <div
+                class="drop solid bg-indigo-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-24 mb-3"
+                data-accept="sólido"
+              ></div>
+              <div class="font-black text-liquid mb-1">
+                Partículas de los Líquidos
+              </div>
+              <div
+                class="drop liquid bg-emerald-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-24 mb-3"
+                data-accept="líquido"
+              ></div>
+              <div class="font-black text-gas mb-1">
+                Partículas de los Gases
+              </div>
+              <div
+                class="drop gas bg-orange-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-24"
+                data-accept="gaseoso"
+              ></div>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2 items-center">
+            <button
+              id="check-2"
+              class="px-4 py-2 rounded-xl bg-solid text-white font-black shadow-soft"
+            >
+              Revisar
+            </button>
+            <button
+              id="reset-2"
+              class="px-4 py-2 rounded-xl bg-white border border-indigo-100 font-black"
+            >
+              Reiniciar
+            </button>
+            <span id="res-2" class="font-black"></span>
+          </div>
+        </section>
+
+        <!-- REPASO -->
+        <section id="tab-repaso" class="tab hidden">
+          <h2 class="text-xl font-black mb-3">
+            Repaso: Los tres estados de la materia
+          </h2>
+          <div class="border border-indigo-100 rounded-2xl p-3 mb-4">
+            <h3 class="font-black mb-2">
+              I. Observa las imágenes y parea los tres estados de la materia
+            </h3>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div
+                id="bank-r-1"
+                class="bank bg-indigo-50/50 border border-indigo-100/70 rounded-2xl p-3 min-h-32"
+              >
+                <div
+                  class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                  data-answer="sólido"
+                >
+                  🪑 mesa
+                </div>
+                <div
+                  class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                  data-answer="líquido"
+                >
+                  💧 Gota de agua
+                </div>
+                <div
+                  class="item inline-flex items-center gap-2 px-3 py-2 m-1 rounded-xl bg-white border border-indigo-100 font-extrabold"
+                  data-answer="gaseoso"
+                >
+                  🎈 globo
+                </div>
+              </div>
+              <div
+                class="targets bg-white border border-indigo-100 rounded-2xl p-3"
+              >
+                <div class="font-black text-liquid mb-1">Estado líquido</div>
+                <div
+                  class="drop liquid bg-emerald-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-20 mb-3"
+                  data-accept="líquido"
+                ></div>
+                <div class="font-black text-gas mb-1">Estado gaseoso</div>
+                <div
+                  class="drop gas bg-orange-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-20 mb-3"
+                  data-accept="gaseoso"
+                ></div>
+                <div class="font-black text-solid mb-1">Estado sólido</div>
+                <div
+                  class="drop solid bg-indigo-50/50 border-2 border-dashed border-indigo-300 rounded-2xl p-2 min-h-20"
+                  data-accept="sólido"
+                ></div>
+              </div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2 items-center">
+              <button
+                id="check-r-1"
+                class="px-4 py-2 rounded-xl bg-solid text-white font-black shadow-soft"
+              >
+                Revisar
+              </button>
+              <button
+                id="reset-r-1"
+                class="px-4 py-2 rounded-xl bg-white border border-indigo-100 font-black"
+              >
+                Reiniciar
+              </button>
+              <span id="res-r-1" class="font-black"></span>
+            </div>
+          </div>
+
+          <div class="border border-indigo-100 rounded-2xl p-3">
+            <h3 class="font-black mb-2">II. Rodea la opción correcta</h3>
+            <div class="q mb-3" data-correct="a">
+              <h4 class="font-extrabold">
+                1. La ______ es todo lo que nos rodea y ocupa espacio.
+              </h4>
+              <label class="block mt-1"
+                ><input type="radio" name="rq1" value="a" /> a.
+                <b>materia</b></label
+              >
+              <label class="block mt-1"
+                ><input type="radio" name="rq1" value="b" /> b. tierra</label
+              >
+              <label class="block mt-1"
+                ><input type="radio" name="rq1" value="c" /> c. hielo</label
+              >
+            </div>
+            <div class="q mb-3" data-correct="b">
+              <h4 class="font-extrabold">
+                2. La cantidad de materia que tiene un objeto se llama ______.
+              </h4>
+              <label class="block mt-1"
+                ><input type="radio" name="rq2" value="a" /> a. tierra</label
+              >
+              <label class="block mt-1"
+                ><input type="radio" name="rq2" value="b" /> b.
+                <b>masa</b></label
+              >
+              <label class="block mt-1"
+                ><input type="radio" name="rq2" value="c" /> c. roca</label
+              >
+            </div>
+            <div class="mt-2 flex flex-wrap gap-2 items-center">
+              <button
+                id="grade-repaso"
+                class="px-4 py-2 rounded-xl bg-solid text-white font-black shadow-soft"
+              >
+                Calificar
+              </button>
+              <button
+                id="clear-repaso"
+                class="px-4 py-2 rounded-xl bg-white border border-indigo-100 font-black"
+              >
+                Limpiar
+              </button>
+              <span id="score-repaso" class="font-black"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- QUIZ -->
+        <section id="tab-quiz" class="tab hidden">
+          <div class="q mb-3" data-correct="a">
+            <h4 class="font-extrabold">
+              1) ¿Cuál tiene forma y volumen fijos?
+            </h4>
+            <label class="block mt-1"
+              ><input type="radio" name="q1" value="a" /> Sólido</label
+            >
+            <label class="block mt-1"
+              ><input type="radio" name="q1" value="b" /> Líquido</label
+            >
+            <label class="block mt-1"
+              ><input type="radio" name="q1" value="c" /> Gaseoso</label
+            >
+          </div>
+          <div class="q mb-3" data-correct="b">
+            <h4 class="font-extrabold">
+              2) ¿Cuál toma la forma del recipiente pero mantiene su volumen?
+            </h4>
+            <label class="block mt-1"
+              ><input type="radio" name="q2" value="a" /> Sólido</label
+            >
+            <label class="block mt-1"
+              ><input type="radio" name="q2" value="b" /> Líquido</label
+            >
+            <label class="block mt-1"
+              ><input type="radio" name="q2" value="c" /> Gaseoso</label
+            >
+          </div>
+          <div class="q mb-3" data-correct="c">
+            <h4 class="font-extrabold">
+              3) ¿En cuál las partículas están muy separadas?
+            </h4>
+            <label class="block mt-1"
+              ><input type="radio" name="q3" value="a" /> Sólido</label
+            >
+            <label class="block mt-1"
+              ><input type="radio" name="q3" value="b" /> Líquido</label
+            >
+            <label class="block mt-1"
+              ><input type="radio" name="q3" value="c" /> Gaseoso</label
+            >
+          </div>
+          <div class="mt-2 flex flex-wrap gap-2 items-center">
+            <button
+              id="grade"
+              class="px-4 py-2 rounded-xl bg-solid text-white font-black shadow-soft"
+            >
+              Calificar
+            </button>
+            <button
+              id="clear-quiz"
+              class="px-4 py-2 rounded-xl bg-white border border-indigo-100 font-black"
+            >
+              Limpiar
+            </button>
+            <span id="quiz-score" class="font-black"></span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      function say(txt) {
+        const t = document.getElementById("voiceToggle");
+        if (!t || !t.checked || !("speechSynthesis" in window)) return;
+        const u = new SpeechSynthesisUtterance(txt);
+        u.lang = "es-ES";
+        u.rate = 1;
+        speechSynthesis.speak(u);
+      }
+
+      /* Tabs */
+      const tabBtns = document.querySelectorAll(".tab-btn");
+      tabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          tabBtns.forEach((b) =>
+            b.classList.remove("active", "ring-2", "ring-indigo-100")
+          );
+          btn.classList.add("active", "ring-2", "ring-indigo-100");
+          document
+            .querySelectorAll(".tab")
+            .forEach((s) => s.classList.add("hidden"));
+          const id = btn.dataset.tab;
+          document.getElementById(id).classList.remove("hidden");
+          say(btn.textContent.trim());
+          if (id === "tab-practicar") initMiniDiagrams();
+        });
+      });
+
+      /* Demos (Aprender) */
+      function fillSolidDemo(sel) {
+        const box = document.querySelector(sel);
+        const w = box.clientWidth,
+          h = box.clientHeight,
+          s = 18;
+        for (let y = 10; y < h - 10; y += s) {
+          for (let x = 10; x < w - 10; x += s) {
+            const d = document.createElement("div");
+            d.className = "dot solid-dot";
+            d.style.left = x + "px";
+            d.style.top = y + "px";
+            box.appendChild(d);
+          }
+        }
+      }
+      function fillLiquidDemo(sel) {
+        const box = document.querySelector(sel),
+          w = box.clientWidth,
+          h = box.clientHeight;
+        for (let i = 0; i < 35; i++) {
+          const d = document.createElement("div");
+          d.className = "dot liquid-dot animate-wiggle";
+          d.style.left = 10 + Math.random() * (w - 40) + "px";
+          d.style.top = 40 + Math.random() * (h - 60) + "px";
+          box.appendChild(d);
+        }
+      }
+      function fillGasDemo(sel) {
+        const box = document.querySelector(sel);
+        for (let i = 0; i < 18; i++) {
+          const d = document.createElement("div");
+          d.className = "dot gas-dot";
+          d.style.left = -20 + Math.random() * 40 + "px";
+          d.style.top = -20 + Math.random() * 40 + "px";
+          d.style.animationDelay = Math.random() * -6 + "s";
+          box.appendChild(d);
+        }
+      }
+      window.addEventListener("load", () => {
+        fillSolidDemo("#demo-solido");
+        fillLiquidDemo("#demo-liquido");
+        fillGasDemo("#demo-gas");
+        initMiniDiagrams();
+      });
+
+      /* Mini-diagramas (Pareo) */
+      function fillMiniDiagram(box, type) {
+        if (!box || box.dataset.filled === "1") return;
+        const w = box.clientWidth,
+          h = box.clientHeight;
+        if (w < 20 || h < 20) {
+          requestAnimationFrame(() => fillMiniDiagram(box, type));
+          return;
+        }
+        box.dataset.filled = "1";
+        if (type === "sólido") {
+          const s = 18;
+          for (let y = 10; y < h - 10; y += s) {
+            for (let x = 10; x < w - 10; x += s) {
+              const d = document.createElement("span");
+              d.className = "mini-dot mini-solid";
+              d.style.left = x + "px";
+              d.style.top = y + "px";
+              box.appendChild(d);
+            }
+          }
+        } else if (type === "líquido") {
+          for (let i = 0; i < 28; i++) {
+            const d = document.createElement("span");
+            d.className = "mini-dot mini-liquid animate-wiggle";
+            d.style.left = 12 + Math.random() * (w - 24) + "px";
+            d.style.top = h * 0.25 + Math.random() * (h * 0.5) + "px";
+            box.appendChild(d);
+          }
+        } else if (type === "gaseoso") {
+          for (let i = 0; i < 14; i++) {
+            const d = document.createElement("span");
+            d.className = "mini-dot mini-gas animate-floatMini";
+            d.style.left = 6 + Math.random() * (w - 12) + "px";
+            d.style.top = 6 + Math.random() * (h - 12) + "px";
+            d.style.animationDelay = Math.random() * -4.5 + "s";
+            box.appendChild(d);
+          }
+        }
+      }
+      function initMiniDiagrams() {
+        document
+          .querySelectorAll(".mini[data-diagram]")
+          .forEach((box) => fillMiniDiagram(box, box.dataset.diagram));
+      }
+      const ro = new ResizeObserver((entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target;
+          if (el.dataset.filled === "1") {
+            el.dataset.filled = "0";
+            el.innerHTML = "";
+          }
+          fillMiniDiagram(el, el.dataset.diagram);
+        });
+      });
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .querySelectorAll(".mini[data-diagram]")
+          .forEach((el) => ro.observe(el));
+      });
+
+      /* DnD / Interact.js */
+      (function () {
+        const isCoarse =
+          matchMedia("(pointer:coarse)").matches || "ontouchstart" in window;
+        const hint = document.getElementById("touchHint");
+        if (isCoarse && hint) hint.classList.remove("hidden");
+
+        function translate(t, x, y) {
+          t.style.transform = `translate(${x}px, ${y}px)`;
+          t.dataset.x = x;
+          t.dataset.y = y;
+        }
+        function resetTransform(el) {
+          translate(el, 0, 0);
+        }
+
+        interact(".item").draggable({
+          inertia: true,
+          autoScroll: true,
+          listeners: {
+            start(e) {
+              e.target.classList.add("dragging");
+            },
+            move(e) {
+              const t = e.target;
+              const x = (parseFloat(t.dataset.x) || 0) + e.dx;
+              const y = (parseFloat(t.dataset.y) || 0) + e.dy;
+              translate(t, x, y);
+            },
+            end(e) {
+              e.target.classList.remove("dragging");
+              resetTransform(e.target);
+            },
+          },
+        });
+
+        interact(".drop, .bank").dropzone({
+          overlap: 0.25,
+          ondragenter(e) {
+            e.target.classList.add("drop-highlight");
+          },
+          ondragleave(e) {
+            e.target.classList.remove("drop-highlight");
+          },
+          ondrop(e) {
+            const item = e.relatedTarget,
+              zone = e.target;
+            const ok =
+              !zone.dataset.accept ||
+              zone.dataset.accept === item.dataset.answer;
+            if (ok) {
+              zone.appendChild(item);
+              resetTransform(item);
+              item.style.outline = "none";
+              zone.classList.remove("drop-highlight");
+              if (navigator.vibrate) navigator.vibrate(15);
+            } else {
+              item.classList.add("shake");
+              setTimeout(() => item.classList.remove("shake"), 260);
+              if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+            }
+          },
+        });
+
+        let selected = null;
+        document.addEventListener(
+          "pointerdown",
+          (e) => {
+            const it = e.target.closest(".item");
+            if (!it) return;
+            if (e.pointerType === "touch" || e.pointerType === "pen") {
+              if (selected)
+                selected.classList.remove("ring-4", "ring-indigo-200");
+              selected = it;
+              it.classList.add("ring-4", "ring-indigo-200");
+              e.preventDefault();
+            }
+          },
+          { passive: false }
+        );
+        document.addEventListener("pointerup", (e) => {
+          if (!selected) return;
+          const zone = e.target.closest(".drop, .bank");
+          if (zone) {
+            const ok =
+              !zone.dataset.accept ||
+              zone.dataset.accept === selected.dataset.answer;
+            if (ok) {
+              zone.appendChild(selected);
+              resetTransform(selected);
+              selected.classList.remove("ring-4", "ring-indigo-200");
+              selected = null;
+              if (navigator.vibrate) navigator.vibrate(10);
+            } else {
+              selected.classList.add("shake");
+              setTimeout(() => selected.classList.remove("shake"), 260);
+              if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+            }
+          }
+        });
+      })();
+
+      /* Helpers evaluación y botones */
+      function checkDrops(scopeSel, resSel) {
+        let ok = 0,
+          total = 0;
+        document
+          .querySelectorAll(`${scopeSel} .targets .drop`)
+          .forEach((drop) => {
+            const accept = drop.dataset.accept;
+            drop.querySelectorAll(".item").forEach((it) => {
+              total++;
+              if (it.dataset.answer === accept) {
+                it.style.outline = "2px solid #22bb66";
+                ok++;
+              } else {
+                it.style.outline = "2px solid #ff4d4f";
+              }
+            });
+          });
+        const span = document.querySelector(resSel);
+        span.innerHTML =
+          ok === total && total > 0
+            ? `<span class="text-emerald-600">¡Perfecto! ${ok}/${total}.</span>`
+            : `Llevas <b>${ok}</b> de <b>${total}</b>.`;
+      }
+      document.getElementById("check-1").onclick = () =>
+        checkDrops("#tab-practicar", "#res-1");
+      document.getElementById("reset-1").onclick = () => {
+        document.getElementById("res-1").textContent = "";
+        const bank = document.getElementById("bank-1");
+        document
+          .querySelectorAll("#tab-practicar .targets .drop .item")
+          .forEach((it) => {
+            bank.appendChild(it);
+            it.style.outline = "none";
+          });
+      };
+      document.getElementById("check-2").onclick = () =>
+        checkDrops("#tab-practicar", "#res-2");
+      document.getElementById("reset-2").onclick = () => {
+        document.getElementById("res-2").textContent = "";
+        const bank = document.getElementById("bank-2");
+        document
+          .querySelectorAll("#tab-practicar .targets .drop .item")
+          .forEach((it) => {
+            bank.appendChild(it);
+            it.style.outline = "none";
+          });
+      };
+      document.getElementById("check-r-1").onclick = () =>
+        checkDrops("#tab-repaso", "#res-r-1");
+      document.getElementById("reset-r-1").onclick = () => {
+        document.getElementById("res-r-1").textContent = "";
+        const bank = document.getElementById("bank-r-1");
+        document
+          .querySelectorAll("#tab-repaso .targets .drop .item")
+          .forEach((it) => {
+            bank.appendChild(it);
+            it.style.outline = "none";
+          });
+      };
+      document.getElementById("grade-repaso").onclick = () => {
+        let c = 0,
+          t = 0;
+        document
+          .querySelectorAll("#tab-repaso .q[data-correct]")
+          .forEach((q) => {
+            t++;
+            const a = q.dataset.correct;
+            const ch = q.querySelector("input:checked")?.value;
+            if (ch === a) c++;
+          });
+        document.getElementById(
+          "score-repaso"
+        ).textContent = `Puntaje: ${c}/${t}`;
+      };
+      document.getElementById("clear-repaso").onclick = () => {
+        document
+          .querySelectorAll("#tab-repaso input[type=radio]")
+          .forEach((i) => (i.checked = false));
+        document.getElementById("score-repaso").textContent = "";
+      };
+      document.getElementById("grade").onclick = () => {
+        let c = 0,
+          t = 0;
+        document.querySelectorAll("#tab-quiz .q").forEach((q) => {
+          if (!q.dataset.correct) return;
+          t++;
+          const a = q.dataset.correct;
+          const ch = q.querySelector("input:checked")?.value;
+          if (ch === a) c++;
+        });
+        document.getElementById(
+          "quiz-score"
+        ).textContent = `Puntaje: ${c}/${t}`;
+      };
+      document.getElementById("clear-quiz").onclick = () => {
+        document
+          .querySelectorAll("#tab-quiz input[type=radio]")
+          .forEach((i) => (i.checked = false));
+        document.getElementById("quiz-score").textContent = "";
+      };
+    </script>
+  </body>
+</html>

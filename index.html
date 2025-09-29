@@ -3,811 +3,158 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LeerKids — Aprende a leer (ES)</title>
+    <title>LeerKids | Menú de pantallas</title>
+    <!-- Tailwind por CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta name="color-scheme" content="light dark" />
     <style>
       html,
       body {
-        font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto;
+        height: 100%;
       }
-      .clamp-2 {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        -webkit-line-clamp: 2;
+      /* Suaviza el scroll horizontal del tab bar en móviles */
+      .tabs-scroll::-webkit-scrollbar {
+        height: 6px;
       }
-
-      /* ===== Globos que suben (tu ajuste: llegan muy arriba y van más rápido) ===== */
-      @keyframes float-up {
-        0% {
-          transform: translateY(110%);
-          opacity: 0;
-        }
-        8% {
-          opacity: 1;
-        }
-        100% {
-          transform: translateY(-600%);
-          opacity: 0;
-        }
-      }
-      .balloon {
-        position: absolute;
-        width: 68px;
-        height: 68px;
+      .tabs-scroll::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
         border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 900;
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
-        animation: float-up var(--dur, 4s) linear forwards;
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        color: #fff;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25),
-          0 2px 6px rgba(0, 0, 0, 0.25);
-        will-change: transform, opacity;
-      }
-      .balloon::after {
-        content: "";
-        position: absolute;
-        bottom: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 10px solid rgba(0, 0, 0, 0.25);
-        filter: blur(0.2px);
-      }
-      .balloon.pop {
-        transform: scale(0.6);
-        opacity: 0.1;
-        transition: 0.25s ease;
-      }
-      /* Área de juego: mejor tacto en móviles */
-      #balloonArea {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
       }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-900">
-    <!-- Header -->
-    <header
-      class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200"
-    >
-      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-        <button
-          id="toggleMenu"
-          class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 text-slate-700"
+  <body
+    class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100"
+  >
+    <div class="min-h-screen flex flex-col">
+      <!-- Header -->
+      <header
+        class="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-950/60 backdrop-blur"
+      >
+        <div
+          class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between"
         >
-          ☰
-        </button>
-        <span
-          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-900 font-extrabold"
-          >📖 LeerKids
-          <span
-            class="text-[11px] font-black bg-sky-100 border border-sky-200 rounded-full px-2 py-[2px]"
-            >MVP</span
-          >
-        </span>
-        <div class="text-sm text-slate-600">Aprende a leer en español</div>
-        <div class="ml-auto flex items-center gap-2">
-          <button
-            id="btnReset"
-            class="px-3 py-2 rounded-xl border border-slate-200 font-bold"
-          >
-            Reiniciar
-          </button>
-          <label class="flex items-center gap-2 text-sm"
-            ><input
-              id="toggleAudio"
-              type="checkbox"
-              class="accent-emerald-600"
-              checked
-            />
-            Audio</label
-          >
+          <h1 class="text-lg font-extrabold tracking-tight">Salon de Clases</h1>
+          <div class="text-xs text-slate-500">Es Divertido Aprender</div>
         </div>
-      </div>
-    </header>
-
-    <!-- Layout -->
-    <main class="max-w-6xl mx-auto px-4 py-4">
-      <div class="grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-4">
-        <!-- Sidebar -->
-        <aside
-          id="sidebar"
-          class="md:sticky md:top-20 h-max bg-white border border-slate-200 rounded-2xl shadow-sm p-3 hidden md:block"
+        <!-- Tabs -->
+        <nav
+          id="tabBar"
+          class="tabs-scroll mx-auto max-w-6xl px-2 pb-2 overflow-x-auto"
         >
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="font-extrabold text-lg">Lecciones</h2>
-          </div>
-          <div id="lessonList" class="space-y-2" role="list"></div>
-        </aside>
+          <!-- Botones se inyectan por JS -->
+        </nav>
+      </header>
 
-        <!-- Main panel -->
-        <section class="space-y-4">
-          <!-- Home -->
-          <div
-            id="home"
-            class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4"
-          >
-            <h1 class="text-2xl font-extrabold">¡Vamos a leer!</h1>
-            <p class="text-sm text-slate-600">
-              Módulos: vocales → sílabas → palabras → frases.
-            </p>
-            <div
-              id="homeShortcuts"
-              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3"
-            ></div>
-          </div>
+      <!-- Contenido -->
+      <main class="flex-1">
+        <!-- Viewer: usa iframe para que cada HTML mantenga sus estilos/JS -->
+        <iframe
+          id="viewer"
+          title="Contenido"
+          class="w-full h-full min-h-[calc(100vh-120px)] border-0 bg-white dark:bg-slate-950"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+        >
+        </iframe>
+      </main>
 
-          <!-- Lesson View -->
-          <div
-            id="lessonView"
-            class="hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-4"
-            role="region"
-            aria-label="Actividad de la lección"
-          >
-            <div class="flex items-center gap-3 flex-wrap">
-              <button
-                id="btnBack"
-                class="px-3 py-2 rounded-xl border border-slate-200 font-bold"
-              >
-                ← Volver
-              </button>
-              <div id="lessonTitle" class="font-extrabold"></div>
-              <div class="text-amber-500 font-black">
-                ⭐ <span id="starCount">0</span>
-              </div>
-            </div>
-            <div class="h-3 bg-slate-200 rounded-full overflow-hidden mt-2">
-              <div
-                id="progressBar"
-                class="h-3 bg-gradient-to-r from-emerald-500 to-sky-500 w-0"
-              ></div>
-            </div>
-            <div id="activity" class="mt-3"></div>
-            <div class="flex items-center gap-2 mt-3">
-              <button
-                id="btnRepeat"
-                class="px-3 py-2 rounded-xl border border-slate-200"
-              >
-                🔊 Repetir
-              </button>
-              <button
-                id="btnNext"
-                class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
-              >
-                Siguiente ▷
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-
-    <div
-      id="toast"
-      class="fixed bottom-4 right-4 bg-slate-900 text-white px-3 py-2 rounded-xl shadow-lg opacity-0 translate-y-2 transition"
-    ></div>
+      <!-- Footer mini -->
+      <footer
+        class="border-t border-slate-200 dark:border-slate-800 text-center text-xs py-3 text-slate-500"
+      >
+        Tip: puedes abrir directamente una pestaña con <code>#id</code> en la
+        URL (ej. <code>#leer</code>).
+      </footer>
+    </div>
 
     <script>
-      // ===== Datos de lecciones =====
-      const LESSONS = [
+      /**
+       * === Cómo añadir más pestañas ===
+       * 1) Agrega un objeto al arreglo TABS con: id, title, url (archivo .html).
+       * 2) No necesitas tocar nada más.
+       */
+      const TABS = [
+        { id: "leer", title: "LeerKids (ES)", url: "leer_kids_es.html" },
         {
-          id: "VOCALES",
-          title: "Vocales (A E I O U)",
-          kind: "choice-sound",
-          prompt: "Toca la vocal que escuchas",
-          pool: ["A", "E", "I", "O", "U"],
-          items: ["A", "E", "I", "O", "U", "A", "I", "U"],
-          speakText: (x) => x,
+          id: "ciencias",
+          title: "Repaso Ciencias",
+          url: "RepasoCiencias.html",
         },
-        {
-          id: "SILABAS_M",
-          title: "Sílabas con M",
-          kind: "choice-sound",
-          prompt: "¿Cuál sílaba escuchas?",
-          pool: ["MA", "ME", "MI", "MO", "MU"],
-          items: ["MA", "ME", "MI", "MO", "MU", "MA", "MI"],
-          speakText: (x) => x.toLowerCase(),
-        },
-        {
-          id: "SILABAS_P",
-          title: "Sílabas con P",
-          kind: "choice-sound",
-          prompt: "Escucha y elige",
-          pool: ["PA", "PE", "PI", "PO", "PU"],
-          items: ["PA", "PE", "PI", "PO", "PU", "PA", "PI"],
-          speakText: (x) => x.toLowerCase(),
-        },
-        {
-          id: "PALABRAS_1",
-          title: "Palabras sencillas",
-          kind: "picture-pick",
-          prompt: "Elige la palabra que coincide con el dibujo",
-          pool: [
-            { w: "MAMÁ", emoji: "👩" },
-            { w: "PAPÁ", emoji: "👨" },
-            { w: "PIÑA", emoji: "🍍" },
-            { w: "MAPA", emoji: "🗺️" },
-            { w: "PUMA", emoji: "🐆" },
-          ],
-          items: ["MAMÁ", "PAPÁ", "MAPA", "PUMA", "PIÑA"],
-          speakText: (w) => w.toLowerCase(),
-        },
-        {
-          id: "BORICUA_1",
-          title: "Palabras boricuas 1",
-          kind: "picture-pick",
-          prompt: "Toca la palabra del dibujo",
-          pool: [
-            { w: "CHINA", emoji: "🍊" },
-            { w: "GUAGUA", emoji: "🚌" },
-            { w: "COQUÍ", emoji: "🐸" },
-            { w: "MOFONGO", emoji: "🥘" },
-            { w: "SORBETO", emoji: "🥤" },
-            { w: "BIZCOCHO", emoji: "🎂" },
-          ],
-          items: ["CHINA", "GUAGUA", "COQUÍ", "MOFONGO", "SORBETO", "BIZCOCHO"],
-          speakText: (w) => w.toLowerCase(),
-        },
-        {
-          id: "FRASES_1",
-          title: "Frases cortas",
-          kind: "build-phrase",
-          prompt: "Ordena las palabras (puedes corregir tocando)",
-          pool: [
-            { phrase: "Mamá me mima", parts: ["Mamá", "me", "mima"] },
-            { phrase: "Papá me mima", parts: ["Papá", "me", "mima"] },
-            { phrase: "Mi mamá me ama", parts: ["Mi", "mamá", "me", "ama"] },
-            { phrase: "Mi papá me ama", parts: ["Mi", "papá", "me", "ama"] },
-            { phrase: "Ana ama a mamá", parts: ["Ana", "ama", "a", "mamá"] },
-          ],
-          items: [0, 1, 2, 3, 4],
-          speakText: (t) => t.toLowerCase(),
-        },
-        /* === Globos (meta 10) === */
-        {
-          id: "GLOBOS_1",
-          title: "Globos: atrapa la letra",
-          kind: "balloon-hunt",
-          prompt: "Toca todos los globos con la letra",
-          pool: ["A", "E", "I", "O", "U", "M", "P", "S", "L", "N", "R"],
-          items: ["A", "E", "I", "O", "U", "M", "P"],
-          goal: 10,
-          speakText: (x) => x,
-        },
+        // { id: 'otra',  title: 'Mi otra pantalla',  url: 'mi_otra_pantalla.html' },
       ];
 
-      // ===== Estado & utilidades =====
-      const STORAGE_KEY = "leerkids-progress-v1";
-      const state = {
-        current: null,
-        index: 0,
-        stars: 0,
-        audioOn: true,
-        cacheVoices: [],
-        balloon: {
-          timer: null,
-          cleanup: [],
-          collected: 0,
-          goal: 0,
-          target: "",
-          spawnMs: 650,
-        },
-      };
+      const tabBar = document.getElementById("tabBar");
+      const viewer = document.getElementById("viewer");
 
-      function loadProgress() {
+      // Persistir última pestaña
+      const LS_KEY = "index-tabs:last";
+
+      function renderTabs(activeId) {
+        tabBar.innerHTML = "";
+        TABS.forEach((t) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.setAttribute("data-id", t.id);
+          btn.className = [
+            "whitespace-nowrap",
+            "px-4 py-2 rounded-xl text-sm font-semibold",
+            "transition-colors",
+            "mr-2 mb-2 border",
+            t.id === activeId
+              ? "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 shadow"
+              : "bg-slate-100/70 dark:bg-slate-800/60 border-transparent text-slate-600 dark:text-slate-300 hover:bg-white hover:text-slate-900 dark:hover:bg-slate-700",
+          ].join(" ");
+          btn.textContent = t.title;
+          btn.addEventListener("click", () => activateTab(t.id));
+          tabBar.appendChild(btn);
+        });
+      }
+
+      function activateTab(id) {
+        const tab = TABS.find((x) => x.id === id) || TABS[0];
+        if (!tab) return;
+        // Carga en iframe
+        viewer.src = tab.url;
+        // Marca activa
+        renderTabs(tab.id);
+        // Guarda estado
         try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-        } catch {
-          return {};
+          localStorage.setItem(LS_KEY, tab.id);
+        } catch {}
+        // Actualiza hash sin hacer scroll
+        if (location.hash !== "#" + tab.id) {
+          history.replaceState(null, "", "#" + tab.id);
         }
       }
-      function saveProgress(p) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-      }
-      function getLessonProgress(id) {
-        const p = loadProgress();
-        return p[id] || { done: 0, stars: 0 };
-      }
-      function setLessonProgress(id, data) {
-        const p = loadProgress();
-        p[id] = { ...getLessonProgress(id), ...data };
-        saveProgress(p);
-      }
 
-      // TTS
-      function ensureVoices() {
-        const load = () => {
-          state.cacheVoices = speechSynthesis.getVoices();
-        };
-        speechSynthesis.addEventListener("voiceschanged", load);
-        load();
-      }
-      function speak(text) {
-        if (!state.audioOn) return;
+      // Soporte para hash y localStorage
+      function getInitialTabId() {
+        const fromHash = (location.hash || "").replace("#", "");
+        if (fromHash && TABS.some((t) => t.id === fromHash)) return fromHash;
         try {
-          speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(text);
-          const voices = state.cacheVoices.length
-            ? state.cacheVoices
-            : speechSynthesis.getVoices();
-          const v =
-            voices.find((v) => /^(es-|es|es_)/i.test(v.lang)) || voices[0];
-          if (v) u.voice = v;
-          u.rate = 0.95;
-          u.pitch = 1;
-          u.lang = v?.lang || "es-ES";
-          speechSynthesis.speak(u);
-        } catch (e) {
-          console.warn("No TTS:", e);
-        }
-      }
-      function toast(msg) {
-        const el = $("#toast");
-        el.text(msg)
-          .removeClass("opacity-0 translate-y-2")
-          .addClass("opacity-100 translate-y-0");
-        setTimeout(
-          () =>
-            el
-              .addClass("opacity-0 translate-y-2")
-              .removeClass("opacity-100 translate-y-0"),
-          1400
-        );
-      }
-      const shuffle = (a) =>
-        a
-          .map((v) => [Math.random(), v])
-          .sort((x, y) => x[0] - y[0])
-          .map((x) => x[1]);
-
-      // ===== UI builders =====
-      function renderLessonList() {
-        const $list = $("#lessonList").empty();
-        LESSONS.forEach((ls) => {
-          const prog = getLessonProgress(ls.id);
-          const isDone = (prog.done || 0) >= ls.items.length;
-          const $card = $(
-            '<div class="flex items-center justify-between gap-2 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer" tabindex="0" role="button" data-id="' +
-              ls.id +
-              '">\
-              <div>\
-                <div class="font-extrabold">' +
-              ls.title +
-              '</div>\
-                <div class="text-xs text-slate-600">Completado: ' +
-              Math.min(prog.done || 0, ls.items.length) +
-              "/" +
-              ls.items.length +
-              '</div>\
-              </div>\
-              <div class="px-2 py-1 text-xs rounded-full ' +
-              (isDone
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                : "bg-slate-100 text-slate-700 border border-slate-200") +
-              '">' +
-              (isDone ? "✅ Completado" : "⭐ " + (prog.stars || 0)) +
-              "</div>\
-            </div>"
-          );
-          $card.on("click keypress", (e) => {
-            if (e.type === "click" || e.key === "Enter") {
-              startLesson(ls.id);
-            }
-          });
-          $list.append($card);
-        });
+          const last = localStorage.getItem(LS_KEY);
+          if (last && TABS.some((t) => t.id === last)) return last;
+        } catch {}
+        return TABS[0]?.id;
       }
 
-      function shortTitle(s) {
-        const base = (s || "").split("(")[0].trim();
-        return base.length > 18 ? base.slice(0, 18) + "…" : base;
-      }
-      function renderHomeShortcuts() {
-        const $grid = $("#homeShortcuts").empty();
-        LESSONS.forEach((ls) => {
-          let big = "📚";
-          if (ls.kind === "choice-sound") {
-            big =
-              (ls.pool?.[0] || "") + (ls.pool?.[1] ? " • " + ls.pool[1] : "");
-          } else if (ls.kind === "picture-pick") {
-            big = ls.pool?.[0]?.emoji || "🖼️";
-          } else if (ls.kind === "build-phrase") {
-            big = "🧩";
-          } else if (ls.kind === "balloon-hunt") {
-            big = "🎈";
-          }
-          const $btn = $(
-            '<button class="flex flex-col items-center justify-center gap-1 p-4 h-28 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow transition" data-jump="' +
-              ls.id +
-              '">\
-               <span class="text-xl font-extrabold">' +
-              big +
-              '</span>\
-               <span class="text-xs text-slate-700 font-extrabold clamp-2">' +
-              shortTitle(ls.title) +
-              "</span>\
-             </button>"
-          );
-          $grid.append($btn);
-        });
-      }
-
-      // ===== Flujo de lección =====
-      function startLesson(id) {
-        stopBalloonGame(); // por si venimos de globos
-        state.current = LESSONS.find((x) => x.id === id);
-        state.index = 0;
-        state.stars = getLessonProgress(id).stars || 0;
-        $("#home").addClass("hidden");
-        $("#lessonView").removeClass("hidden");
-        $("#lessonTitle").text(state.current.title);
-        $("#starCount").text(state.stars);
-        renderStep();
-        if (window.innerWidth < 768) {
-          $("#sidebar").addClass("hidden");
-        }
-      }
-
-      function renderStep() {
-        const ls = state.current;
-        if (!ls) return;
-        const total = ls.items.length;
-        $("#progressBar").css("width", (state.index / total) * 100 + "%");
-        const item = ls.items[state.index];
-
-        if (ls.kind === "choice-sound") {
-          const opts = shuffle(ls.pool).slice(0, 4);
-          if (!opts.includes(item)) {
-            opts[Math.floor(Math.random() * opts.length)] = item;
-          }
-          $("#activity").html(
-            '<div class="text-sm text-slate-600">' +
-              ls.prompt +
-              '</div>\
-             <div class="mt-2"><button id="btnPlay" class="px-3 py-2 rounded-xl border border-slate-200">🔊 Escuchar</button></div>\
-             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
-              opts
-                .map(
-                  (o) =>
-                    '<div class="flex items-center justify-center h-20 text-2xl font-black bg-white border border-slate-200 rounded-2xl cursor-pointer" data-val="' +
-                    o +
-                    '">' +
-                    o +
-                    "</div>"
-                )
-                .join("") +
-              "</div>"
-          );
-          const say = ls.speakText(item);
-          const play = () => speak(say);
-          $("#btnPlay").on("click", play);
-          $("#btnRepeat").off().on("click", play);
-          setTimeout(play, 200);
-          $("#activity [data-val]").on("click", onPickChoiceOrPic(item, ls));
-        } else if (ls.kind === "picture-pick") {
-          const opts = shuffle(ls.pool).slice(0, 4);
-          const needle = ls.pool.find((p) => p.w === item) || opts[0];
-          if (!opts.some((x) => x.w === item)) {
-            opts[Math.floor(Math.random() * opts.length)] = needle;
-          }
-          $("#activity").html(
-            '<div class="text-sm text-slate-600">' +
-              ls.prompt +
-              '</div>\
-             <div class="flex items-center justify-center h-24 text-6xl">' +
-              needle.emoji +
-              '</div>\
-             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
-              opts
-                .map(
-                  (o) =>
-                    '<div class="flex items-center justify-center h-16 text-xl font-black bg-white border border-slate-200 rounded-2xl cursor-pointer" data-val="' +
-                    o.w +
-                    '">' +
-                    o.w +
-                    "</div>"
-                )
-                .join("") +
-              "</div>"
-          );
-          const say = needle.w.toLowerCase();
-          const play = () => speak(say);
-          $("#btnRepeat").off().on("click", play);
-          setTimeout(play, 200);
-          $("#activity [data-val]").on("click", onPickChoiceOrPic(item, ls));
-        } else if (ls.kind === "build-phrase") {
-          const entry = ls.pool[item];
-          const parts = shuffle(entry.parts.slice());
-          $("#activity").html(
-            '<div class="text-sm text-slate-600">' +
-              ls.prompt +
-              '</div>\
-             <div id="drop" class="min-h-[72px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2"></div>\
-             <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-3">' +
-              parts
-                .map(
-                  (p, i) =>
-                    '<button class="px-3 py-2 rounded-xl bg-white border border-slate-200" data-word="' +
-                    p +
-                    '" data-idx="' +
-                    i +
-                    '">' +
-                    p +
-                    "</button>"
-                )
-                .join("") +
-              "</div>"
-          );
-          const speakPhrase = () => speak(entry.phrase.toLowerCase());
-          $("#btnRepeat").off().on("click", speakPhrase);
-          setTimeout(speakPhrase, 200);
-          $("#phraseBank [data-word]").on("click", function () {
-            if ($(this).prop("disabled")) return;
-            const w = $(this).data("word"),
-              idx = $(this).data("idx");
-            $(this)
-              .prop("disabled", true)
-              .addClass("opacity-50 cursor-not-allowed");
-            $("#drop").append(
-              '<span class="px-3 py-1 rounded-full bg-sky-50 border border-sky-200" data-part="' +
-                w +
-                '" data-idx="' +
-                idx +
-                '" title="Quitar">' +
-                w +
-                "</span>"
-            );
-          });
-          $("#drop")
-            .off()
-            .on("click", "[data-idx]", function () {
-              const idx = $(this).data("idx");
-              $(this).remove();
-              const $b = $('#phraseBank [data-idx="' + idx + '"]');
-              $b.prop("disabled", false).removeClass(
-                "opacity-50 cursor-not-allowed"
-              );
-            });
-        } else if (ls.kind === "balloon-hunt") {
-          startBalloonGame(ls, item); // globos
-        }
-      }
-
-      // handler compartido para choice-sound y picture-pick
-      function onPickChoiceOrPic(item, ls) {
-        return function () {
-          const val = $(this).data("val");
-          const $g = $(this).closest('[class*="grid"]');
-          $g.find("[data-val]").removeClass(
-            "ring-2 ring-red-400 ring-emerald-400"
-          );
-          const correct =
-            val === item || val === (typeof item === "string" ? item : item.w);
-          $(this).addClass(
-            correct ? "ring-2 ring-emerald-400" : "ring-2 ring-red-400"
-          );
-          speak(correct ? "¡Muy bien!" : "Intenta de nuevo");
-          if (correct) {
-            state.stars++;
-            $("#starCount").text(state.stars);
-            setLessonProgress(ls.id, { stars: state.stars });
-          }
-        };
-      }
-
-      function nextStep() {
-        const ls = state.current;
-        if (!ls) return;
-        if (ls.kind === "build-phrase") {
-          const idx = ls.items[state.index];
-          const target = ls.pool[idx];
-          const built = $("#drop [data-part]")
-            .map((i, el) => $(el).data("part"))
-            .get();
-          const ok = built.join(" ") === target.parts.join(" ");
-          if (!ok) {
-            toast("Aún no está en orden");
-            speak("Aún no está en orden");
-            return;
-          }
-        }
-        if (ls.kind === "balloon-hunt") {
-          if (state.balloon.collected < state.balloon.goal) {
-            toast("Aún faltan globos");
-            speak("Aún faltan globos");
-            return;
-          }
-          stopBalloonGame();
-        }
-
-        state.index++;
-        const total = state.current.items.length;
-        setLessonProgress(state.current.id, {
-          done: Math.max(getLessonProgress(ls.id).done, state.index),
-        });
-        if (state.index >= total) {
-          $("#progressBar").css("width", "100%");
-          speak("¡Excelente! Lección completa.");
-          toast("Lección completa ✨");
-          $("#lessonView").addClass("hidden");
-          $("#home").removeClass("hidden");
-          renderLessonList();
-          renderHomeShortcuts();
-        } else {
-          renderStep();
-        }
-      }
-
-      /* ===== Juego de Globos ===== */
-      const BAL_COLORS = [
-        "bg-rose-500",
-        "bg-red-500",
-        "bg-orange-500",
-        "bg-amber-500",
-        "bg-emerald-500",
-        "bg-teal-500",
-        "bg-sky-500",
-        "bg-blue-500",
-        "bg-violet-500",
-        "bg-fuchsia-500",
-      ];
-
-      function startBalloonGame(ls, item) {
-        stopBalloonGame(); // limpio
-        const goal = ls.goal || 10;
-        state.balloon.collected = 0;
-        state.balloon.goal = goal;
-        state.balloon.target = item;
-
-        const promptText = `${ls.prompt} ${item}. Toca ${goal}.`;
-        $("#activity").html(
-          '<div class="text-sm text-slate-600">' +
-            promptText +
-            '</div>\
-           <div class="flex items-center gap-2 mt-2 text-sm">\
-             <span class="font-extrabold">Objetivo:</span> <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">' +
-            item +
-            '</span>\
-             <span class="ml-2 font-extrabold">Llevas:</span> <span id="balloonCount" class="px-2 py-1 rounded-full bg-slate-100 border border-slate-200">0/' +
-            goal +
-            '</span>\
-           </div>\
-           <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3" style="height: 360px; cursor: pointer;">\
-           </div>'
-        );
-
-        const say = () => {
-          speak("Toca todos los globos con la letra");
-          setTimeout(() => speak(item), 240);
-        };
-        $("#btnRepeat").off().on("click", say);
-        setTimeout(say, 120);
-
-        const $area = $("#balloonArea");
-        const spawn = () => spawnBalloon($area, ls.pool, item);
-
-        state.balloon.timer = setInterval(() => {
-          if (state.balloon.collected >= state.balloon.goal) {
-            stopBalloonGame();
-            return;
-          }
-          spawn();
-        }, state.balloon.spawnMs);
-
-        state.balloon.cleanup.push(() => {
-          $area.find(".balloon").remove();
-        });
-      }
-
-      function stopBalloonGame() {
-        if (state.balloon.timer) {
-          clearInterval(state.balloon.timer);
-          state.balloon.timer = null;
-        }
-        (state.balloon.cleanup || []).forEach((fn) => {
-          try {
-            fn();
-          } catch {}
-        });
-        state.balloon.cleanup = [];
-      }
-
-      function spawnBalloon($area, pool, target) {
-        const isTarget = Math.random() < 0.45;
-        const letter = isTarget
-          ? target
-          : shuffle(pool.filter((l) => l !== target))[0] || target;
-        const leftPct = Math.floor(6 + Math.random() * 88);
-        const dur = (3 + Math.random() * 2.2).toFixed(2) + "s";
-        const color = BAL_COLORS[Math.floor(Math.random() * BAL_COLORS.length)];
-
-        const $b = $('<div class="balloon ' + color + '"></div>');
-        $b.css({ left: leftPct + "%", bottom: "-80px", "--dur": dur });
-        $b.attr("data-letter", letter).text(letter);
-
-        $b.on("animationend", function () {
-          $(this).remove();
-        });
-
-        // Unificado a pointerdown para evitar doble evento en móviles
-        $b.on("pointerdown", function (e) {
-          e.preventDefault();
-          const val = $(this).attr("data-letter");
-          if ($(this).hasClass("pop")) return;
-          const ok = val === target;
-          if (ok) {
-            $(this).addClass("ring-2 ring-emerald-300 pop");
-            state.stars++;
-            $("#starCount").text(state.stars);
-            setLessonProgress(state.current.id, { stars: state.stars });
-            state.balloon.collected++;
-            $("#balloonCount").text(
-              state.balloon.collected + "/" + state.balloon.goal
-            );
-            speak("¡Bien!");
-            setTimeout(() => $(this).remove(), 150);
-            if (state.balloon.collected >= state.balloon.goal) {
-              toast("¡Meta alcanzada! Pulsa Siguiente");
-              speak("¡Meta alcanzada!");
-              stopBalloonGame();
-            }
-          } else {
-            $(this).addClass("ring-2 ring-red-400");
-            speak("No");
-            setTimeout(() => $(this).removeClass("ring-2 ring-red-400"), 300);
-          }
-        });
-
-        $area.append($b);
-      }
-
-      // ===== Eventos globales =====
-      $(function () {
-        ensureVoices();
-        renderLessonList();
-        renderHomeShortcuts();
-
-        $(document).on("click", "[data-jump]", function () {
-          startLesson($(this).data("jump"));
-        });
-        $("#btnBack").on("click", () => {
-          stopBalloonGame();
-          $("#lessonView").addClass("hidden");
-          $("#home").removeClass("hidden");
-        });
-        $("#btnNext").on("click", nextStep);
-        $("#btnRepeat").on("click", () => {});
-        $("#toggleAudio").on("change", function () {
-          state.audioOn = this.checked;
-          toast(this.checked ? "Audio activado" : "Audio desactivado");
-        });
-        $("#btnReset").on("click", () => {
-          if (confirm("¿Borrar progreso?")) {
-            localStorage.removeItem(STORAGE_KEY);
-            toast("Progreso borrado");
-            renderLessonList();
-            renderHomeShortcuts();
-          }
-        });
-        $("#toggleMenu").on("click", () => $("#sidebar").toggleClass("hidden"));
+      // Reacciona si el usuario cambia el hash manualmente
+      window.addEventListener("hashchange", () => {
+        const id = (location.hash || "").replace("#", "");
+        if (TABS.some((t) => t.id === id)) activateTab(id);
       });
+
+      // Ajusta alto del iframe cuando cambia el tamaño de la ventana
+      function resizeViewer() {
+        // Header + tabs + footer ≈ 120px; el min-h ya cubre, pero ajustamos por si acaso
+        viewer.style.height = window.innerHeight - 120 + "px";
+      }
+      window.addEventListener("resize", resizeViewer);
+
+      // Init
+      renderTabs(getInitialTabId());
+      activateTab(getInitialTabId());
+      resizeViewer();
     </script>
   </body>
 </html>
