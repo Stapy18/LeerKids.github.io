@@ -51,6 +51,7 @@
         <iframe
           id="viewer"
           title="Contenido"
+          7
           class="w-full h-full min-h-[calc(100vh-120px)] border-0 bg-white dark:bg-slate-950"
           loading="lazy"
           referrerpolicy="no-referrer"
@@ -60,10 +61,9 @@
 
       <!-- Footer mini -->
       <footer
-        class="border-t border-slate-200 dark:border-slate-800 text-center text-xs py-3 text-slate-500"
+        class="border-t border-slate-200 dark:border-slate-800 text-center text-xs py-4"
       >
-        Tip: puedes abrir directamente una pestaña con <code>#id</code> en la
-        URL (ej. <code>#leer</code>).
+        <span class="text-slate-500">© <span id="year"></span> Stapy</span>
       </footer>
     </div>
 
@@ -89,6 +89,9 @@
 
       const tabBar = document.getElementById("tabBar");
       const viewer = document.getElementById("viewer");
+
+      // Año actual para copyright
+      document.getElementById("year").textContent = new Date().getFullYear();
 
       // Persistir última pestaña
       const LS_KEY = "index-tabs:last";

@@ -24,7 +24,7 @@
         -webkit-line-clamp: 2;
       }
 
-      /* ===== Globos que suben (tu ajuste: llegan muy arriba y van más rápido) ===== */
+      /* ===== Globos que suben ===== */
       @keyframes float-up {
         0% {
           transform: translateY(110%);
@@ -75,10 +75,40 @@
         opacity: 0.1;
         transition: 0.25s ease;
       }
-      /* Área de juego: mejor tacto en móviles */
       #balloonArea {
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+      }
+
+      /* Botones de palabra (build-phrase) iguales a tarjetas */
+      .word-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 3.5rem; /* h-14 */
+        border-radius: 1rem; /* rounded-2xl */
+        font-weight: 900;
+      }
+      @media (min-width: 640px) {
+        .word-btn {
+          height: 4rem;
+        }
+      } /* sm:h-16 */
+
+      /* Píldoras en el área de construcción */
+      .drop-pill {
+        display: inline-flex;
+        align-items: center;
+        height: 2.75rem; /* h-11 */
+        padding: 0 0.75rem;
+        border-radius: 9999px;
+        font-weight: 800;
+      }
+
+      /* Estado deshabilitado del botón Siguiente */
+      .btn-next[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
     </style>
   </head>
@@ -189,7 +219,7 @@
               </button>
               <button
                 id="btnNext"
-                class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
+                class="btn-next px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
               >
                 Siguiente ▷
               </button>
@@ -275,9 +305,10 @@
             { phrase: "Papá me mima", parts: ["Papá", "me", "mima"] },
             { phrase: "Mi mamá me ama", parts: ["Mi", "mamá", "me", "ama"] },
             { phrase: "Mi papá me ama", parts: ["Mi", "papá", "me", "ama"] },
-            { phrase: "Ana ama a mamá", parts: ["Ana", "ama", "a", "mamá"] },
+            { phrase: "Papá ama a mamá", parts: ["Papá", "ama", "a", "mamá"] },
+            { phrase: "Mamá ama a papá", parts: ["Mamá", "ama", "a", "papá"] },
           ],
-          items: [0, 1, 2, 3, 4],
+          items: [0, 1, 2, 3, 4, 5],
           speakText: (t) => t.toLowerCase(),
         },
         /* === Globos (meta 10) === */
@@ -301,6 +332,7 @@
         stars: 0,
         audioOn: true,
         cacheVoices: [],
+        canAdvance: false,
         balloon: {
           timer: null,
           cleanup: [],
@@ -377,6 +409,12 @@
           .sort((x, y) => x[0] - y[0])
           .map((x) => x[1]);
 
+      // Control del botón Siguiente
+      function setNextEnabled(ok) {
+        state.canAdvance = !!ok;
+        $("#btnNext").prop("disabled", !ok);
+      }
+
       // ===== UI builders =====
       function renderLessonList() {
         const $list = $("#lessonList").empty();
@@ -387,7 +425,7 @@
             '<div class="flex items-center justify-between gap-2 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer" tabindex="0" role="button" data-id="' +
               ls.id +
               '">\
-              <div>\
+              <div class="min-w-0">\
                 <div class="font-extrabold">' +
               ls.title +
               '</div>\
@@ -397,7 +435,7 @@
               ls.items.length +
               '</div>\
               </div>\
-              <div class="px-2 py-1 text-xs rounded-full ' +
+              <div class="inline-flex items-center justify-center gap-1 min-w-[92px] px-2 py-1 text-xs rounded-full whitespace-nowrap tabular-nums ' +
               (isDone
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 : "bg-slate-100 text-slate-700 border border-slate-200") +
@@ -471,6 +509,7 @@
         const total = ls.items.length;
         $("#progressBar").css("width", (state.index / total) * 100 + "%");
         const item = ls.items[state.index];
+        setNextEnabled(false); // bloquear al cargar cada paso
 
         if (ls.kind === "choice-sound") {
           const opts = shuffle(ls.pool).slice(0, 4);
@@ -481,7 +520,6 @@
             '<div class="text-sm text-slate-600">' +
               ls.prompt +
               '</div>\
-             <div class="mt-2"><button id="btnPlay" class="px-3 py-2 rounded-xl border border-slate-200">🔊 Escuchar</button></div>\
              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
               opts
                 .map(
@@ -497,10 +535,26 @@
           );
           const say = ls.speakText(item);
           const play = () => speak(say);
-          $("#btnPlay").on("click", play);
           $("#btnRepeat").off().on("click", play);
           setTimeout(play, 200);
-          $("#activity [data-val]").on("click", onPickChoiceOrPic(item, ls));
+          $("#activity [data-val]").on("click", function () {
+            const val = $(this).data("val");
+            const $g = $(this).closest('[class*="grid"]');
+            $g.find("[data-val]").removeClass(
+              "ring-2 ring-red-400 ring-emerald-400"
+            );
+            const correct = val === item;
+            $(this).addClass(
+              correct ? "ring-2 ring-emerald-400" : "ring-2 ring-red-400"
+            );
+            speak(correct ? "¡Muy bien!" : "Intenta de nuevo");
+            if (correct) {
+              state.stars++;
+              $("#starCount").text(state.stars);
+              setLessonProgress(ls.id, { stars: state.stars });
+              setNextEnabled(true);
+            }
+          });
         } else if (ls.kind === "picture-pick") {
           const opts = shuffle(ls.pool).slice(0, 4);
           const needle = ls.pool.find((p) => p.w === item) || opts[0];
@@ -531,7 +585,24 @@
           const play = () => speak(say);
           $("#btnRepeat").off().on("click", play);
           setTimeout(play, 200);
-          $("#activity [data-val]").on("click", onPickChoiceOrPic(item, ls));
+          $("#activity [data-val]").on("click", function () {
+            const val = $(this).data("val");
+            const $g = $(this).closest('[class*="grid"]');
+            $g.find("[data-val]").removeClass(
+              "ring-2 ring-red-400 ring-emerald-400"
+            );
+            const correct = val === item;
+            $(this).addClass(
+              correct ? "ring-2 ring-emerald-400" : "ring-2 ring-red-400"
+            );
+            speak(correct ? "¡Muy bien!" : "Intenta de nuevo");
+            if (correct) {
+              state.stars++;
+              $("#starCount").text(state.stars);
+              setLessonProgress(ls.id, { stars: state.stars });
+              setNextEnabled(true);
+            }
+          });
         } else if (ls.kind === "build-phrase") {
           const entry = ls.pool[item];
           const parts = shuffle(entry.parts.slice());
@@ -539,12 +610,12 @@
             '<div class="text-sm text-slate-600">' +
               ls.prompt +
               '</div>\
-             <div id="drop" class="min-h-[72px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2"></div>\
-             <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-3">' +
+             <div id="drop" class="min-h-[84px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2"></div>\
+             <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">' +
               parts
                 .map(
                   (p, i) =>
-                    '<button class="px-3 py-2 rounded-xl bg-white border border-slate-200" data-word="' +
+                    '<button class="word-btn bg-white border border-slate-200 text-base sm:text-lg" data-word="' +
                     p +
                     '" data-idx="' +
                     i +
@@ -558,6 +629,15 @@
           const speakPhrase = () => speak(entry.phrase.toLowerCase());
           $("#btnRepeat").off().on("click", speakPhrase);
           setTimeout(speakPhrase, 200);
+
+          function checkOK() {
+            const built = $("#drop [data-part]")
+              .map((i, el) => $(el).data("part"))
+              .get();
+            const ok = built.join(" ") === entry.parts.join(" ");
+            setNextEnabled(ok);
+            return ok;
+          }
           $("#phraseBank [data-word]").on("click", function () {
             if ($(this).prop("disabled")) return;
             const w = $(this).data("word"),
@@ -566,7 +646,7 @@
               .prop("disabled", true)
               .addClass("opacity-50 cursor-not-allowed");
             $("#drop").append(
-              '<span class="px-3 py-1 rounded-full bg-sky-50 border border-sky-200" data-part="' +
+              '<span class="drop-pill bg-sky-50 border border-sky-200 text-base sm:text-lg" data-part="' +
                 w +
                 '" data-idx="' +
                 idx +
@@ -574,6 +654,7 @@
                 w +
                 "</span>"
             );
+            checkOK();
           });
           $("#drop")
             .off()
@@ -584,56 +665,23 @@
               $b.prop("disabled", false).removeClass(
                 "opacity-50 cursor-not-allowed"
               );
+              checkOK();
             });
         } else if (ls.kind === "balloon-hunt") {
           startBalloonGame(ls, item); // globos
+          setNextEnabled(false);
         }
-      }
-
-      // handler compartido para choice-sound y picture-pick
-      function onPickChoiceOrPic(item, ls) {
-        return function () {
-          const val = $(this).data("val");
-          const $g = $(this).closest('[class*="grid"]');
-          $g.find("[data-val]").removeClass(
-            "ring-2 ring-red-400 ring-emerald-400"
-          );
-          const correct =
-            val === item || val === (typeof item === "string" ? item : item.w);
-          $(this).addClass(
-            correct ? "ring-2 ring-emerald-400" : "ring-2 ring-red-400"
-          );
-          speak(correct ? "¡Muy bien!" : "Intenta de nuevo");
-          if (correct) {
-            state.stars++;
-            $("#starCount").text(state.stars);
-            setLessonProgress(ls.id, { stars: state.stars });
-          }
-        };
       }
 
       function nextStep() {
         const ls = state.current;
         if (!ls) return;
-        if (ls.kind === "build-phrase") {
-          const idx = ls.items[state.index];
-          const target = ls.pool[idx];
-          const built = $("#drop [data-part]")
-            .map((i, el) => $(el).data("part"))
-            .get();
-          const ok = built.join(" ") === target.parts.join(" ");
-          if (!ok) {
-            toast("Aún no está en orden");
-            speak("Aún no está en orden");
-            return;
-          }
+        if (!state.canAdvance) {
+          speak("Primero completa este paso");
+          toast("Primero completa este paso");
+          return;
         }
         if (ls.kind === "balloon-hunt") {
-          if (state.balloon.collected < state.balloon.goal) {
-            toast("Aún faltan globos");
-            speak("Aún faltan globos");
-            return;
-          }
           stopBalloonGame();
         }
 
@@ -670,7 +718,7 @@
       ];
 
       function startBalloonGame(ls, item) {
-        stopBalloonGame(); // limpio
+        stopBalloonGame();
         const goal = ls.goal || 10;
         state.balloon.collected = 0;
         state.balloon.goal = goal;
@@ -689,8 +737,7 @@
             goal +
             '</span>\
            </div>\
-           <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3" style="height: 360px; cursor: pointer;">\
-           </div>'
+           <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3" style="height: 360px; cursor: pointer;"></div>'
         );
 
         const say = () => {
@@ -739,14 +786,14 @@
         const color = BAL_COLORS[Math.floor(Math.random() * BAL_COLORS.length)];
 
         const $b = $('<div class="balloon ' + color + '"></div>');
-        $b.css({ left: leftPct + "%", bottom: "-80px", "--dur": dur });
-        $b.attr("data-letter", letter).text(letter);
+        $b.css({ left: leftPct + "%", bottom: "-80px", "--dur": dur })
+          .attr("data-letter", letter)
+          .text(letter);
 
         $b.on("animationend", function () {
           $(this).remove();
         });
 
-        // Unificado a pointerdown para evitar doble evento en móviles
         $b.on("pointerdown", function (e) {
           e.preventDefault();
           const val = $(this).attr("data-letter");
@@ -767,6 +814,7 @@
               toast("¡Meta alcanzada! Pulsa Siguiente");
               speak("¡Meta alcanzada!");
               stopBalloonGame();
+              setNextEnabled(true);
             }
           } else {
             $(this).addClass("ring-2 ring-red-400");
