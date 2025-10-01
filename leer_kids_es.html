@@ -12,6 +12,7 @@
       rel="stylesheet"
     />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <style>
       html,
       body {
@@ -23,8 +24,7 @@
         overflow: hidden;
         -webkit-line-clamp: 2;
       }
-
-      /* ===== Globos que suben ===== */
+      /* Globos */
       @keyframes float-up {
         0% {
           transform: translateY(110%);
@@ -51,11 +51,9 @@
         animation: float-up var(--dur, 4s) linear forwards;
         user-select: none;
         -webkit-user-select: none;
-        -webkit-tap-highlight-color: transparent;
         color: #fff;
         text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25),
           0 2px 6px rgba(0, 0, 0, 0.25);
-        will-change: transform, opacity;
       }
       .balloon::after {
         content: "";
@@ -68,93 +66,104 @@
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-top: 10px solid rgba(0, 0, 0, 0.25);
-        filter: blur(0.2px);
       }
       .balloon.pop {
         transform: scale(0.6);
         opacity: 0.1;
         transition: 0.25s ease;
       }
-      #balloonArea {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-      }
-
-      /* Botones de palabra (build-phrase) iguales a tarjetas */
+      /* Palabras/frases */
       .word-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 3.5rem; /* h-14 */
-        border-radius: 1rem; /* rounded-2xl */
+        height: 3.5rem;
+        border-radius: 1rem;
         font-weight: 900;
       }
       @media (min-width: 640px) {
         .word-btn {
           height: 4rem;
         }
-      } /* sm:h-16 */
-
-      /* Píldoras en el área de construcción */
+      }
       .drop-pill {
         display: inline-flex;
         align-items: center;
-        height: 2.75rem; /* h-11 */
+        height: 2.75rem;
         padding: 0 0.75rem;
         border-radius: 9999px;
         font-weight: 800;
+        cursor: pointer;
       }
-
-      /* Estado deshabilitado del botón Siguiente */
       .btn-next[disabled] {
         opacity: 0.5;
         cursor: not-allowed;
       }
     </style>
+
+    <!-- Carga SOLO el archivo JS de lecciones -->
+    <script src="lessons.js"></script>
   </head>
   <body class="bg-slate-50 text-slate-900">
-    <!-- Header -->
+    <!-- Header compacto en móviles -->
     <header
       class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200"
     >
-      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div
+        class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-2"
+      >
         <button
           id="toggleMenu"
           class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 text-slate-700"
+          title="Abrir/cerrar lecciones"
         >
           ☰
         </button>
         <span
           class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-900 font-extrabold"
-          >📖 LeerKids
+        >
+          📖 <span class="hidden xs:inline">LeerKids</span>
           <span
             class="text-[11px] font-black bg-sky-100 border border-sky-200 rounded-full px-2 py-[2px]"
             >MVP</span
           >
         </span>
-        <div class="text-sm text-slate-600">Aprende a leer en español</div>
-        <div class="ml-auto flex items-center gap-2">
+        <div class="text-sm text-slate-600 hidden sm:block">
+          Aprende a leer en español
+        </div>
+        <div class="ml-auto flex items-center gap-1 sm:gap-2">
           <button
             id="btnReset"
-            class="px-3 py-2 rounded-xl border border-slate-200 font-bold"
+            class="px-3 py-2 rounded-xl border border-slate-200 font-bold hidden sm:inline-flex"
           >
             Reiniciar
           </button>
-          <label class="flex items-center gap-2 text-sm"
-            ><input
+          <button
+            id="btnResetSm"
+            class="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200"
+            title="Reiniciar"
+          >
+            ↻
+          </button>
+          <label
+            class="flex items-center gap-1 text-sm px-2 py-1 rounded-xl border border-slate-200"
+          >
+            <span aria-hidden="true">🔊</span>
+            <input
               id="toggleAudio"
               type="checkbox"
               class="accent-emerald-600"
               checked
+              aria-label="Audio"
             />
-            Audio</label
-          >
+            <span class="hidden sm:inline">Audio</span>
+          </label>
         </div>
       </div>
     </header>
 
     <!-- Layout -->
-    <main class="max-w-6xl mx-auto px-4 py-4">
+    <main class="max-w-6xl mx-auto px-3 sm:px-4 py-4">
       <div class="grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-4">
         <!-- Sidebar -->
         <aside
@@ -164,12 +173,11 @@
           <div class="flex items-center justify-between mb-2">
             <h2 class="font-extrabold text-lg">Lecciones</h2>
           </div>
-          <div id="lessonList" class="space-y-2" role="list"></div>
+          <div id="lessonList" class="space-y-3" role="list"></div>
         </aside>
 
-        <!-- Main panel -->
+        <!-- Main -->
         <section class="space-y-4">
-          <!-- Home -->
           <div
             id="home"
             class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4"
@@ -184,7 +192,6 @@
             ></div>
           </div>
 
-          <!-- Lesson View -->
           <div
             id="lessonView"
             class="hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-4"
@@ -235,96 +242,28 @@
     ></div>
 
     <script>
-      // ===== Datos de lecciones =====
-      const LESSONS = [
-        {
-          id: "VOCALES",
-          title: "Vocales (A E I O U)",
-          kind: "choice-sound",
-          prompt: "Toca la vocal que escuchas",
-          pool: ["A", "E", "I", "O", "U"],
-          items: ["A", "E", "I", "O", "U", "A", "I", "U"],
-          speakText: (x) => x,
-        },
-        {
-          id: "SILABAS_M",
-          title: "Sílabas con M",
-          kind: "choice-sound",
-          prompt: "¿Cuál sílaba escuchas?",
-          pool: ["MA", "ME", "MI", "MO", "MU"],
-          items: ["MA", "ME", "MI", "MO", "MU", "MA", "MI"],
-          speakText: (x) => x.toLowerCase(),
-        },
-        {
-          id: "SILABAS_P",
-          title: "Sílabas con P",
-          kind: "choice-sound",
-          prompt: "Escucha y elige",
-          pool: ["PA", "PE", "PI", "PO", "PU"],
-          items: ["PA", "PE", "PI", "PO", "PU", "PA", "PI"],
-          speakText: (x) => x.toLowerCase(),
-        },
-        {
-          id: "PALABRAS_1",
-          title: "Palabras sencillas",
-          kind: "picture-pick",
-          prompt: "Elige la palabra que coincide con el dibujo",
-          pool: [
-            { w: "MAMÁ", emoji: "👩" },
-            { w: "PAPÁ", emoji: "👨" },
-            { w: "PIÑA", emoji: "🍍" },
-            { w: "MAPA", emoji: "🗺️" },
-            { w: "PUMA", emoji: "🐆" },
-          ],
-          items: ["MAMÁ", "PAPÁ", "MAPA", "PUMA", "PIÑA"],
-          speakText: (w) => w.toLowerCase(),
-        },
-        {
-          id: "BORICUA_1",
-          title: "Palabras boricuas 1",
-          kind: "picture-pick",
-          prompt: "Toca la palabra del dibujo",
-          pool: [
-            { w: "CHINA", emoji: "🍊" },
-            { w: "GUAGUA", emoji: "🚌" },
-            { w: "COQUÍ", emoji: "🐸" },
-            { w: "MOFONGO", emoji: "🥘" },
-            { w: "SORBETO", emoji: "🥤" },
-            { w: "BIZCOCHO", emoji: "🎂" },
-          ],
-          items: ["CHINA", "GUAGUA", "COQUÍ", "MOFONGO", "SORBETO", "BIZCOCHO"],
-          speakText: (w) => w.toLowerCase(),
-        },
-        {
-          id: "FRASES_1",
-          title: "Frases cortas",
-          kind: "build-phrase",
-          prompt: "Ordena las palabras (puedes corregir tocando)",
-          pool: [
-            { phrase: "Mamá me mima", parts: ["Mamá", "me", "mima"] },
-            { phrase: "Papá me mima", parts: ["Papá", "me", "mima"] },
-            { phrase: "Mi mamá me ama", parts: ["Mi", "mamá", "me", "ama"] },
-            { phrase: "Mi papá me ama", parts: ["Mi", "papá", "me", "ama"] },
-            { phrase: "Papá ama a mamá", parts: ["Papá", "ama", "a", "mamá"] },
-            { phrase: "Mamá ama a papá", parts: ["Mamá", "ama", "a", "papá"] },
-          ],
-          items: [0, 1, 2, 3, 4, 5],
-          speakText: (t) => t.toLowerCase(),
-        },
-        /* === Globos (meta 10) === */
-        {
-          id: "GLOBOS_1",
-          title: "Globos: atrapa la letra",
-          kind: "balloon-hunt",
-          prompt: "Toca todos los globos con la letra",
-          pool: ["A", "E", "I", "O", "U", "M", "P", "S", "L", "N", "R"],
-          items: ["A", "E", "I", "O", "U", "M", "P"],
-          goal: 10,
-          speakText: (x) => x,
-        },
-      ];
+      /* ========= Carga de lecciones SOLO desde lessons.js ========= */
+      let LESSONS = [];
+      (function initLessonsFromJS() {
+        if (
+          !Array.isArray(window.LEERKIDS_LESSONS) ||
+          !window.LEERKIDS_LESSONS.length
+        ) {
+          alert(
+            "No se encontró lessons.js o está vacío. Asegúrate de poner lessons.js junto a index.html."
+          );
+          window.LEERKIDS_LESSONS = [];
+        }
+        LESSONS = window.LEERKIDS_LESSONS.map((ls) => {
+          // Normaliza speakText: acepta "lower" o "x"
+          let fn = (t) => t;
+          if (ls.speakText === "lower") fn = (t) => String(t).toLowerCase();
+          else if (ls.speakText === "x" || ls.speakText == null) fn = (t) => t;
+          return { ...ls, speakText: fn };
+        });
+      })();
 
-      // ===== Estado & utilidades =====
+      /* ========= Estado / utilidades ========= */
       const STORAGE_KEY = "leerkids-progress-v1";
       const state = {
         current: null,
@@ -342,7 +281,6 @@
           spawnMs: 650,
         },
       };
-
       function loadProgress() {
         try {
           return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -362,8 +300,6 @@
         p[id] = { ...getLessonProgress(id), ...data };
         saveProgress(p);
       }
-
-      // TTS
       function ensureVoices() {
         const load = () => {
           state.cacheVoices = speechSynthesis.getVoices();
@@ -408,49 +344,107 @@
           .map((v) => [Math.random(), v])
           .sort((x, y) => x[0] - y[0])
           .map((x) => x[1]);
-
-      // Control del botón Siguiente
       function setNextEnabled(ok) {
         state.canAdvance = !!ok;
         $("#btnNext").prop("disabled", !ok);
       }
 
-      // ===== UI builders =====
+      /* ========= Agrupar por categoría / subcategoría ========= */
+      function groupByCategory(lessons) {
+        const catMap = {};
+        for (const ls of lessons) {
+          const cat = ls.category || "General";
+          const sub = ls.subcategory || null;
+          catMap[cat] = catMap[cat] || {};
+          if (sub) {
+            catMap[cat][sub] = catMap[cat][sub] || [];
+            catMap[cat][sub].push(ls);
+          } else {
+            catMap[cat]._root = catMap[cat]._root || [];
+            catMap[cat]._root.push(ls);
+          }
+        }
+        return catMap;
+      }
+
+      /* ========= UI: Sidebar / Home ========= */
       function renderLessonList() {
         const $list = $("#lessonList").empty();
-        LESSONS.forEach((ls) => {
-          const prog = getLessonProgress(ls.id);
-          const isDone = (prog.done || 0) >= ls.items.length;
-          const $card = $(
-            '<div class="flex items-center justify-between gap-2 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer" tabindex="0" role="button" data-id="' +
-              ls.id +
-              '">\
-              <div class="min-w-0">\
-                <div class="font-extrabold">' +
-              ls.title +
-              '</div>\
-                <div class="text-xs text-slate-600">Completado: ' +
-              Math.min(prog.done || 0, ls.items.length) +
-              "/" +
-              ls.items.length +
-              '</div>\
-              </div>\
-              <div class="inline-flex items-center justify-center gap-1 min-w-[92px] px-2 py-1 text-xs rounded-full whitespace-nowrap tabular-nums ' +
-              (isDone
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                : "bg-slate-100 text-slate-700 border border-slate-200") +
-              '">' +
-              (isDone ? "✅ Completado" : "⭐ " + (prog.stars || 0)) +
-              "</div>\
-            </div>"
-          );
-          $card.on("click keypress", (e) => {
-            if (e.type === "click" || e.key === "Enter") {
-              startLesson(ls.id);
-            }
+        const groups = groupByCategory(LESSONS);
+
+        Object.keys(groups)
+          .sort()
+          .forEach((cat) => {
+            const $cat = $(
+              '<details open class="border border-slate-200 rounded-xl overflow-hidden bg-white"></details>'
+            );
+            const $summary = $(
+              '<summary class="cursor-pointer select-none px-3 py-2 font-extrabold bg-slate-50 border-b border-slate-200 text-slate-800 flex items-center justify-between"></summary>'
+            );
+            $summary.append("<span>" + cat + "</span>");
+            $summary.append(
+              '<span class="text-slate-500 text-xs">toca para contraer</span>'
+            );
+            $cat.append($summary);
+
+            const $container = $('<div class="p-2 space-y-2"></div>');
+
+            // Lecciones sin subcategoría
+            const root = groups[cat]._root || [];
+            root.forEach((ls) => $container.append(lessonItem(ls)));
+
+            // Subcategorías
+            Object.keys(groups[cat])
+              .filter((k) => k !== "_root")
+              .sort()
+              .forEach((sub) => {
+                const $sub = $('<div class="mt-2"></div>');
+                $sub.append(
+                  '<div class="text-xs font-black uppercase tracking-wide text-slate-500 px-2 mb-1">' +
+                    sub +
+                    "</div>"
+                );
+                groups[cat][sub].forEach((ls) => $sub.append(lessonItem(ls)));
+                $container.append($sub);
+              });
+
+            $cat.append($container);
+            $list.append($cat);
           });
-          $list.append($card);
+      }
+
+      function lessonItem(ls) {
+        const prog = getLessonProgress(ls.id);
+        const isDone = (prog.done || 0) >= ls.items.length;
+        const $card = $(
+          '<div class="flex items-center justify-between gap-2 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer" tabindex="0" role="button" data-id="' +
+            ls.id +
+            '">\
+        <div class="min-w-0">\
+          <div class="font-extrabold">' +
+            ls.title +
+            '</div>\
+          <div class="text-xs text-slate-600">Completado: ' +
+            Math.min(prog.done || 0, ls.items.length) +
+            "/" +
+            ls.items.length +
+            '</div>\
+        </div>\
+        <div class="inline-flex items-center justify-center gap-1 min-w-[92px] px-2 py-1 text-xs rounded-full whitespace-nowrap tabular-nums ' +
+            (isDone
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : "bg-slate-100 text-slate-700 border border-slate-200") +
+            '">' +
+            (isDone ? "✅ Completado" : "⭐ " + (prog.stars || 0)) +
+            "</div>\
+      </div>"
+        );
+        $card.on("click keypress", (e) => {
+          if (e.type === "click" || e.key === "Enter") {
+            startLesson(ls.id);
+          }
         });
+        return $card;
       }
 
       function shortTitle(s) {
@@ -475,21 +469,21 @@
             '<button class="flex flex-col items-center justify-center gap-1 p-4 h-28 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow transition" data-jump="' +
               ls.id +
               '">\
-               <span class="text-xl font-extrabold">' +
+          <span class="text-xl font-extrabold">' +
               big +
               '</span>\
-               <span class="text-xs text-slate-700 font-extrabold clamp-2">' +
+          <span class="text-xs text-slate-700 font-extrabold clamp-2">' +
               shortTitle(ls.title) +
               "</span>\
-             </button>"
+        </button>"
           );
           $grid.append($btn);
         });
       }
 
-      // ===== Flujo de lección =====
+      /* ========= Flujo de lección ========= */
       function startLesson(id) {
-        stopBalloonGame(); // por si venimos de globos
+        stopBalloonGame();
         state.current = LESSONS.find((x) => x.id === id);
         state.index = 0;
         state.stars = getLessonProgress(id).stars || 0;
@@ -509,7 +503,7 @@
         const total = ls.items.length;
         $("#progressBar").css("width", (state.index / total) * 100 + "%");
         const item = ls.items[state.index];
-        setNextEnabled(false); // bloquear al cargar cada paso
+        setNextEnabled(false);
 
         if (ls.kind === "choice-sound") {
           const opts = shuffle(ls.pool).slice(0, 4);
@@ -520,7 +514,7 @@
             '<div class="text-sm text-slate-600">' +
               ls.prompt +
               '</div>\
-             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
               opts
                 .map(
                   (o) =>
@@ -547,12 +541,15 @@
             $(this).addClass(
               correct ? "ring-2 ring-emerald-400" : "ring-2 ring-red-400"
             );
-            speak(correct ? "¡Muy bien!" : "Intenta de nuevo");
             if (correct) {
+              speak("¡Muy bien!");
               state.stars++;
               $("#starCount").text(state.stars);
               setLessonProgress(ls.id, { stars: state.stars });
               setNextEnabled(true);
+            } else {
+              speak("Intenta de nuevo");
+              setNextEnabled(false);
             }
           });
         } else if (ls.kind === "picture-pick") {
@@ -565,10 +562,10 @@
             '<div class="text-sm text-slate-600">' +
               ls.prompt +
               '</div>\
-             <div class="flex items-center justify-center h-24 text-6xl">' +
+          <div class="flex items-center justify-center h-24 text-6xl">' +
               needle.emoji +
               '</div>\
-             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
               opts
                 .map(
                   (o) =>
@@ -595,12 +592,15 @@
             $(this).addClass(
               correct ? "ring-2 ring-emerald-400" : "ring-2 ring-red-400"
             );
-            speak(correct ? "¡Muy bien!" : "Intenta de nuevo");
             if (correct) {
+              speak("¡Muy bien!");
               state.stars++;
               $("#starCount").text(state.stars);
               setLessonProgress(ls.id, { stars: state.stars });
               setNextEnabled(true);
+            } else {
+              speak("Intenta de nuevo");
+              setNextEnabled(false);
             }
           });
         } else if (ls.kind === "build-phrase") {
@@ -610,12 +610,12 @@
             '<div class="text-sm text-slate-600">' +
               ls.prompt +
               '</div>\
-             <div id="drop" class="min-h-[84px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2"></div>\
-             <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">' +
+          <div id="drop" class="min-h-[84px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2"></div>\
+          <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">' +
               parts
                 .map(
                   (p, i) =>
-                    '<button class="word-btn bg-white border border-slate-200 text-base sm:text-lg" data-word="' +
+                    '<button class="word-btn bg-white border border-slate-200 text-base sm:text-lg cursor-pointer" data-word="' +
                     p +
                     '" data-idx="' +
                     i +
@@ -629,7 +629,6 @@
           const speakPhrase = () => speak(entry.phrase.toLowerCase());
           $("#btnRepeat").off().on("click", speakPhrase);
           setTimeout(speakPhrase, 200);
-
           function checkOK() {
             const built = $("#drop [data-part]")
               .map((i, el) => $(el).data("part"))
@@ -668,7 +667,7 @@
               checkOK();
             });
         } else if (ls.kind === "balloon-hunt") {
-          startBalloonGame(ls, item); // globos
+          startBalloonGame(ls, item);
           setNextEnabled(false);
         }
       }
@@ -684,7 +683,6 @@
         if (ls.kind === "balloon-hunt") {
           stopBalloonGame();
         }
-
         state.index++;
         const total = state.current.items.length;
         setLessonProgress(state.current.id, {
@@ -703,7 +701,7 @@
         }
       }
 
-      /* ===== Juego de Globos ===== */
+      /* ========= Globos ========= */
       const BAL_COLORS = [
         "bg-rose-500",
         "bg-red-500",
@@ -716,40 +714,35 @@
         "bg-violet-500",
         "bg-fuchsia-500",
       ];
-
       function startBalloonGame(ls, item) {
         stopBalloonGame();
         const goal = ls.goal || 10;
         state.balloon.collected = 0;
         state.balloon.goal = goal;
         state.balloon.target = item;
-
         const promptText = `${ls.prompt} ${item}. Toca ${goal}.`;
         $("#activity").html(
           '<div class="text-sm text-slate-600">' +
             promptText +
             '</div>\
-           <div class="flex items-center gap-2 mt-2 text-sm">\
-             <span class="font-extrabold">Objetivo:</span> <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">' +
+        <div class="flex items-center gap-2 mt-2 text-sm">\
+          <span class="font-extrabold">Objetivo:</span> <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">' +
             item +
             '</span>\
-             <span class="ml-2 font-extrabold">Llevas:</span> <span id="balloonCount" class="px-2 py-1 rounded-full bg-slate-100 border border-slate-200">0/' +
+          <span class="ml-2 font-extrabold">Llevas:</span> <span id="balloonCount" class="px-2 py-1 rounded-full bg-slate-100 border border-slate-200">0/' +
             goal +
             '</span>\
-           </div>\
-           <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3" style="height: 360px; cursor: pointer;"></div>'
+        </div>\
+        <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3" style="height:360px;cursor:pointer;"></div>'
         );
-
         const say = () => {
           speak("Toca todos los globos con la letra");
           setTimeout(() => speak(item), 240);
         };
         $("#btnRepeat").off().on("click", say);
         setTimeout(say, 120);
-
         const $area = $("#balloonArea");
         const spawn = () => spawnBalloon($area, ls.pool, item);
-
         state.balloon.timer = setInterval(() => {
           if (state.balloon.collected >= state.balloon.goal) {
             stopBalloonGame();
@@ -757,12 +750,10 @@
           }
           spawn();
         }, state.balloon.spawnMs);
-
         state.balloon.cleanup.push(() => {
           $area.find(".balloon").remove();
         });
       }
-
       function stopBalloonGame() {
         if (state.balloon.timer) {
           clearInterval(state.balloon.timer);
@@ -775,7 +766,6 @@
         });
         state.balloon.cleanup = [];
       }
-
       function spawnBalloon($area, pool, target) {
         const isTarget = Math.random() < 0.45;
         const letter = isTarget
@@ -784,16 +774,13 @@
         const leftPct = Math.floor(6 + Math.random() * 88);
         const dur = (3 + Math.random() * 2.2).toFixed(2) + "s";
         const color = BAL_COLORS[Math.floor(Math.random() * BAL_COLORS.length)];
-
         const $b = $('<div class="balloon ' + color + '"></div>');
         $b.css({ left: leftPct + "%", bottom: "-80px", "--dur": dur })
           .attr("data-letter", letter)
           .text(letter);
-
         $b.on("animationend", function () {
           $(this).remove();
         });
-
         $b.on("pointerdown", function (e) {
           e.preventDefault();
           const val = $(this).attr("data-letter");
@@ -822,16 +809,14 @@
             setTimeout(() => $(this).removeClass("ring-2 ring-red-400"), 300);
           }
         });
-
         $area.append($b);
       }
 
-      // ===== Eventos globales =====
+      /* ========= Eventos globales ========= */
       $(function () {
         ensureVoices();
         renderLessonList();
         renderHomeShortcuts();
-
         $(document).on("click", "[data-jump]", function () {
           startLesson($(this).data("jump"));
         });
@@ -846,14 +831,15 @@
           state.audioOn = this.checked;
           toast(this.checked ? "Audio activado" : "Audio desactivado");
         });
-        $("#btnReset").on("click", () => {
+        const doReset = () => {
           if (confirm("¿Borrar progreso?")) {
             localStorage.removeItem(STORAGE_KEY);
             toast("Progreso borrado");
             renderLessonList();
             renderHomeShortcuts();
           }
-        });
+        };
+        $("#btnReset, #btnResetSm").on("click", doReset);
         $("#toggleMenu").on("click", () => $("#sidebar").toggleClass("hidden"));
       });
     </script>
