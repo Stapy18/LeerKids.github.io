@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LeerKids · Cartilla Fonética (One‑Page)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+      html,
+      body {
+        font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto;
+      }
+      .clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+      }
+      /* Globos */
+      @keyframes float-up {
+        0% {
+          transform: translateY(110%);
+          opacity: 0;
+        }
+        8% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-600%);
+          opacity: 0;
+        }
+      }
+      .balloon {
+        position: absolute;
+        width: 68px;
+        height: 68px;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+        animation: float-up var(--dur, 4s) linear forwards;
+        user-select: none;
+        -webkit-user-select: none;
+        color: #fff;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25),
+          0 2px 6px rgba(0, 0, 0, 0.25);
+      }
+      .balloon::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 10px solid rgba(0, 0, 0, 0.25);
+      }
+      .balloon.pop {
+        transform: scale(0.6);
+        opacity: 0.1;
+        transition: 0.25s ease;
+      }
+      /* Palabras/frases */
+      .word-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 3.5rem;
+        border-radius: 1rem;
+        font-weight: 900;
+      }
+      @media (min-width: 640px) {
+        .word-btn {
+          height: 4rem;
+        }
+      }
+      .drop-pill {
+        display: inline-flex;
+        align-items: center;
+        height: 2.75rem;
+        padding: 0 0.75rem;
+        border-radius: 9999px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .btn-next[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* lightweight helpers used in cartilla */
+      .option-btn {
+        cursor: pointer;
+      }
+      .draggable {
+        cursor: grab;
+      }
+      .droppable {
+        min-height: 56px;
+      }
+      .page-viewport {
+        max-height: 72svh;
+      }
+      .no-select {
+        -webkit-user-select: none;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="max-w-6xl mx-auto p-4 sm:p-6">
+      <!-- Header / Progress -->
+      <header
+        class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+      >
+        <div>
+          <h1
+            class="text-2xl sm:text-3xl font-extrabold tracking-tight text-sky-900"
+          >
+            LeerKids · Cartilla Fonética
+          </h1>
+          <p class="text-sm text-slate-600">
+            Juegos para aprender a leer (5–8 años). Todo en una sola página, sin
+            instalaciones.
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div
+            id="stars"
+            class="text-amber-500 text-2xl"
+            title="Progreso"
+          ></div>
+          <button
+            id="btnResetProgress"
+            class="px-3 py-2 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 text-sm"
+          >
+            Reiniciar progreso
+          </button>
+        </div>
+      </header>
+
+      <!-- Tabs / Router -->
+      <nav
+        class="sticky top-0 z-10 bg-sky-50/90 backdrop-blur border-y border-sky-100 mb-4"
+      >
+        <div class="flex flex-wrap gap-2 py-2">
+          <button
+            data-section="#home"
+            class="tab px-3 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900"
+          >
+            Inicio
+          </button>
+          <button
+            data-section="#viewer"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Visor del libro
+          </button>
+          <button
+            data-section="#vowels"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Vocales
+          </button>
+          <button
+            data-section="#syllables"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Sílabas
+          </button>
+          <button
+            data-section="#listen"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Escucha y elige
+          </button>
+          <button
+            data-section="#balloons"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Globos
+          </button>
+          <button
+            data-section="#build"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Arma la palabra
+          </button>
+          <button
+            data-section="#ajustes"
+            class="tab px-3 py-2 rounded-xl hover:bg-sky-100"
+          >
+            Ajustes
+          </button>
+        </div>
+      </nav>
+
+      <main class="space-y-8">
+        <!-- Inicio -->
+        <section id="home" class="section">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-5 rounded-2xl bg-white shadow">
+              <h2 class="text-xl font-bold mb-2">¿Cómo funciona?</h2>
+              <ul class="list-disc pl-5 space-y-1 text-slate-700">
+                <li>Toca una pestaña para abrir un juego.</li>
+                <li>
+                  Usa <b>Re‑escuchar</b> para volver a oír la sílaba o palabra.
+                </li>
+                <li>
+                  Gana ⭐ por aciertos; tu progreso se guarda en este navegador.
+                </li>
+                <li>
+                  El <b>Visor del libro</b> muestra las páginas SVG
+                  (<code>book/page_1.svg…book/page_32.svg</code>) que coloques
+                  en la carpeta <code>book/</code> junto a este HTML.
+                </li>
+              </ul>
+              <p class="mt-3 text-sm text-slate-500">
+                Sugerencia: súbelo a GitHub Pages o abre el archivo directamente
+                en tu navegador. Mantén los SVG en la misma carpeta que este
+                archivo.
+              </p>
+            </div>
+            <div
+              class="p-5 rounded-2xl bg-gradient-to-br from-sky-100 to-emerald-100 shadow"
+            >
+              <h3 class="text-lg font-semibold">Cobertura de la cartilla</h3>
+              <p class="text-slate-700">
+                Incluye vocales, sílabas directas (ma, me…), combinación y
+                lectura de palabras, escucha y discriminación auditiva,
+                construcción de palabras, y juegos tipo globos. Puedes ampliar
+                el contenido desde <b>Ajustes</b> sin editar código.
+              </p>
+              <div class="mt-4 text-sm">
+                <span class="inline-block px-2 py-1 rounded bg-white/80 mr-2"
+                  >Vocales</span
+                >
+                <span class="inline-block px-2 py-1 rounded bg-white/80 mr-2"
+                  >Sílabas</span
+                >
+                <span class="inline-block px-2 py-1 rounded bg-white/80 mr-2"
+                  >Palabras</span
+                >
+                <span class="inline-block px-2 py-1 rounded bg-white/80"
+                  >Oraciones*</span
+                >
+                <p class="mt-1 text-slate-500">
+                  *Deja ejemplos en Ajustes → Palabras para habilitar oraciones
+                  simples.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visor del libro -->
+        <section id="viewer" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <button
+                  id="prevPage"
+                  class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200"
+                >
+                  ◀
+                </button>
+                <button
+                  id="nextPage"
+                  class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200"
+                >
+                  ▶
+                </button>
+                <span class="text-sm text-slate-600"
+                  >Página <span id="pageNum">1</span> /
+                  <span id="pageTotal">32</span></span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  id="fullBtn"
+                  class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200"
+                  title="Pantalla completa"
+                >
+                  ⛶
+                </button>
+                <label class="text-sm text-slate-600">Zoom</label>
+                <input
+                  id="zoom"
+                  type="range"
+                  min="50"
+                  max="150"
+                  value="100"
+                  class="w-40"
+                />
+              </div>
+            </div>
+            <div
+              class="border rounded-xl overflow-hidden bg-slate-50 grid place-items-center page-viewport"
+            >
+              <img
+                id="bookImg"
+                alt="Página"
+                class="max-h-[72svh] w-full h-auto object-contain"
+              />
+            </div>
+            <div class="mt-3 text-xs text-slate-500">
+              Coloca los archivos <code>page_1.svg</code> …
+              <code>page_32.svg</code> dentro de la carpeta
+              <code>book/</code> junto a este HTML que este HTML. Se cargarán
+              automáticamente.
+            </div>
+          </div>
+        </section>
+
+        <!-- Juego: Vocales -->
+        <section id="vowels" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-bold text-lg">Vocales: escucha y toca</h2>
+              <div>
+                <button
+                  id="vowelsHear"
+                  class="px-3 py-2 rounded-lg bg-sky-100 hover:bg-sky-200"
+                >
+                  Re‑escuchar
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <!-- options render here -->
+            </div>
+            <div id="vowelsMsg" class="mt-4 text-sm"></div>
+          </div>
+        </section>
+
+        <!-- Juego: Sílabas (tablero + quiz) -->
+        <section id="syllables" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow space-y-5">
+            <div>
+              <h2 class="font-bold text-lg mb-2">Tablero de sílabas</h2>
+              <div class="text-sm text-slate-600 mb-2">
+                Toca para escuchar. Activa consonantes en <b>Ajustes</b>.
+              </div>
+              <div
+                id="sylBoard"
+                class="grid grid-cols-5 sm:grid-cols-10 gap-2"
+              ></div>
+            </div>
+            <hr />
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold">Quiz de sílabas</h3>
+                <div class="flex items-center gap-2">
+                  <button
+                    id="sylRehear"
+                    class="px-3 py-2 rounded-lg bg-sky-100 hover:bg-sky-200"
+                  >
+                    Re‑escuchar
+                  </button>
+                  <button
+                    id="sylNext"
+                    class="px-3 py-2 rounded-lg bg-emerald-100 hover:bg-emerald-200"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+              <div class="text-sm text-slate-600 mb-2">
+                Escucha la sílaba y elige la correcta.
+              </div>
+              <div id="sylQuestion" class="text-2xl font-extrabold mb-2"></div>
+              <div
+                id="sylOptions"
+                class="grid grid-cols-2 sm:grid-cols-4 gap-2"
+              ></div>
+              <div id="sylMsg" class="mt-3 text-sm"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Juego: Escucha y elige (palabras) -->
+        <section id="listen" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <div class="mb-2">
+              <h2 class="font-bold text-lg">Escucha y elige (palabras)</h2>
+            </div>
+            <div class="text-sm text-slate-600">
+              Escucha la palabra y toca la opción correcta.
+            </div>
+            <div id="listenWord" class="text-3xl font-black my-3 hidden"></div>
+            <div
+              id="listenOptions"
+              class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2"
+            ></div>
+            <div class="mt-4 flex items-center gap-2">
+              <button
+                id="listenHear"
+                class="px-3 py-2 rounded-lg bg-sky-100 hover:bg-sky-200"
+              >
+                Re‑escuchar 🔊
+              </button>
+              <button
+                id="listenNext"
+                class="px-3 py-2 rounded-lg bg-emerald-100 hover:bg-emerald-200"
+              >
+                Siguiente ➜
+              </button>
+            </div>
+            <div id="listenMsg" class="mt-3 text-sm"></div>
+          </div>
+        </section>
+
+        <!-- Juego: Globos (sílabas) -->
+        <section id="balloons" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <div>
+                <h2 class="font-bold text-lg">Globos de sílabas</h2>
+                <p class="text-sm text-slate-600">
+                  Revienta los globos con la sílaba objetivo.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <label>Objetivo:</label>
+                <select
+                  id="ballTarget"
+                  class="px-2 py-1 border rounded-lg"
+                ></select>
+                <label class="ml-3">Dificultad:</label>
+                <input id="ballSpeed" type="range" min="1" max="5" value="2" />
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mb-2 text-sm text-slate-700">
+              <button
+                id="ballStart"
+                class="px-3 py-2 rounded-lg bg-emerald-100 hover:bg-emerald-200"
+              >
+                Iniciar
+              </button>
+              <button
+                id="ballPause"
+                class="px-3 py-2 rounded-lg bg-sky-100 hover:bg-sky-200"
+              >
+                Pausar
+              </button>
+              <button
+                id="ballReset"
+                class="px-3 py-2 rounded-lg bg-rose-100 hover:bg-rose-200"
+              >
+                Reiniciar
+              </button>
+              <span class="ml-auto"
+                >✅ <span id="ballOk">0</span> · ❌
+                <span id="ballBad">0</span></span
+              >
+            </div>
+            <div
+              id="ballZone"
+              class="relative w-full h-[58svh] sm:h-[62svh] overflow-hidden rounded-xl bg-gradient-to-t from-sky-100 to-sky-50 border"
+            ></div>
+          </div>
+        </section>
+
+        <!-- Juego: Arma la palabra (drag&drop de sílabas) -->
+        <section id="build" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <h2 class="font-bold text-lg mb-2">Arma la palabra</h2>
+            <p class="text-sm text-slate-600 mb-3">
+              Arrastra las sílabas al orden correcto.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="flex-1">
+                <div id="buildTarget" class="text-xl font-bold mb-2"></div>
+                <div
+                  id="dropZone"
+                  class="droppable flex flex-wrap gap-2 p-3 rounded-xl bg-slate-50 border min-h-[72px]"
+                ></div>
+                <div id="buildMsg" class="mt-3 text-sm"></div>
+              </div>
+              <div class="w-full sm:w-64">
+                <div class="text-sm text-slate-600 mb-1">
+                  Sílabas disponibles
+                </div>
+                <div id="tiles" class="grid grid-cols-3 gap-2"></div>
+                <div class="mt-3 flex items-center gap-2">
+                  <button
+                    id="buildNew"
+                    class="px-3 py-2 rounded-lg bg-emerald-100 hover:bg-emerald-200"
+                  >
+                    Nueva palabra
+                  </button>
+                  <button
+                    id="buildHear"
+                    class="px-3 py-2 rounded-lg bg-sky-100 hover:bg-sky-200"
+                  >
+                    Escuchar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Ajustes / Contenido -->
+        <section id="ajustes" class="section hidden">
+          <div class="p-4 rounded-2xl bg-white shadow space-y-6">
+            <div>
+              <h3 class="font-semibold mb-2">
+                Consonantes activas (sílabas directas)
+              </h3>
+              <div id="consonantsBox" class="flex flex-wrap gap-2"></div>
+              <p class="mt-2 text-xs text-slate-500">
+                Se generan sílabas {consonante + vocal}. Ej.: m+a → <b>ma</b>.
+              </p>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-2">
+                Palabras del juego "Escucha y elige" y "Arma la palabra"
+              </h3>
+              <textarea
+                id="wordsInput"
+                class="w-full h-36 p-3 border rounded-xl text-sm"
+                spellcheck="false"
+              >
+mamá; ma-má
+pato; pa-to
+luna; lu-na
+sapo; sa-po
+taza; ta-za
+mesa; me-sa
+toma; to-ma
+mimo; mi-mo
+
+</textarea
+              >
+              <div class="mt-2 flex items-center gap-2">
+                <button
+                  id="saveWords"
+                  class="px-3 py-2 rounded-lg bg-emerald-100 hover:bg-emerald-200"
+                >
+                  Guardar palabras
+                </button>
+                <span class="text-xs text-slate-500"
+                  >Formato: <code>palabra; si-la-bas-se-pa-ra-das</code> (con
+                  guiones).</span
+                >
+              </div>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-2">Voz y audio</h3>
+              <div class="flex flex-wrap items-center gap-3 text-sm">
+                <label>Voz:</label>
+                <select
+                  id="voiceSelect"
+                  class="px-2 py-1 border rounded-lg"
+                ></select>
+                <label>Velocidad:</label>
+                <input
+                  id="rate"
+                  type="range"
+                  min="0.7"
+                  max="1.4"
+                  value="1"
+                  step="0.1"
+                />
+                <label>Volumen:</label>
+                <input
+                  id="volume"
+                  type="range"
+                  min="0"
+                  max="1"
+                  value="1"
+                  step="0.1"
+                />
+              </div>
+              <p id="voiceWarn" class="mt-2 text-xs text-rose-600 hidden">
+                Tu navegador no soporta <code>speechSynthesis</code> o aún no
+                cargó las voces.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="mt-10 text-center text-xs text-slate-500">
+        © <span id="year"></span> LeerKids · Hecho con cariño boricua 💙
+      </footer>
+    </div>
+
+    <script>
+      // ===== Utilidades =====
+      function rand(n) {
+        return Math.floor(Math.random() * n);
+      }
+      function shuffle(arr) {
+        return arr
+          .map(function (v) {
+            return [Math.random(), v];
+          })
+          .sort(function (a, b) {
+            return a[0] - b[0];
+          })
+          .map(function (x) {
+            return x[1];
+          });
+      }
+      function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+      }
+
+      // ===== Progreso (estrellas) =====
+      var PROG_KEY = "leerkids-stars-v1";
+      function getStars() {
+        return parseInt(localStorage.getItem(PROG_KEY) || "0", 10);
+      }
+      function setStars(v) {
+        localStorage.setItem(PROG_KEY, String(Math.max(0, v)));
+        renderStars();
+      }
+      function addStar(n) {
+        if (n === void 0) n = 1;
+        setStars(getStars() + n);
+      }
+      function renderStars() {
+        var n = clamp(getStars(), 0, 999);
+        var blocks = Math.floor(n / 5);
+        var rest = n % 5;
+        var html = "";
+        for (var i = 0; i < blocks; i++) html += "⭐⭐⭐⭐⭐ ";
+        for (var j = 0; j < rest; j++) html += "⭐";
+        if (!html) html = "—";
+        $("#stars").html(html);
+      }
+
+      // ===== Contenido base =====
+      var VOWELS = ["a", "e", "i", "o", "u"];
+      var DEFAULT_CONSONANTS = [
+        "m",
+        "p",
+        "l",
+        "s",
+        "t",
+        "n",
+        "d",
+        "c",
+        "r",
+        "b",
+        "f",
+      ];
+      function genSyllables(cons) {
+        var out = [];
+        cons.forEach(function (c) {
+          VOWELS.forEach(function (v) {
+            out.push(c + v);
+          });
+        });
+        return out;
+      }
+
+      // ===== Palabras =====
+      var WORDS = [
+        { word: "mamá", syl: ["ma", "má"] },
+        { word: "pato", syl: ["pa", "to"] },
+        { word: "luna", syl: ["lu", "na"] },
+        { word: "sapo", syl: ["sa", "po"] },
+        { word: "taza", syl: ["ta", "za"] },
+        { word: "mesa", syl: ["me", "sa"] },
+        { word: "toma", syl: ["to", "ma"] },
+        { word: "mimo", syl: ["mi", "mo"] },
+      ];
+      function parseWords(text) {
+        var lines = text
+          .split(/\n+/)
+          .map(function (s) {
+            return s.trim();
+          })
+          .filter(Boolean);
+        var list = [];
+        var k;
+        for (k = 0; k < lines.length; k++) {
+          var line = lines[k];
+          var parts = line.split(";");
+          var pal = (parts[0] || "").trim();
+          var syls = (parts[1] || "").trim();
+          if (!pal || !syls) continue;
+          var arr = syls
+            .split("-")
+            .map(function (s) {
+              return s.trim();
+            })
+            .filter(Boolean);
+          if (arr.length) list.push({ word: pal, syl: arr });
+        }
+        return list;
+      }
+
+      // ===== Voz (Web Speech API) =====
+      var VOICES = [];
+      var voiceReady = false;
+      function loadVoices() {
+        if (!("speechSynthesis" in window)) return;
+        VOICES = window.speechSynthesis.getVoices().filter(function (v) {
+          return v.lang && v.lang.indexOf("es") === 0;
+        });
+        voiceReady = VOICES.length > 0;
+        var $sel = $("#voiceSelect");
+        $sel.empty();
+        if (voiceReady) {
+          VOICES.forEach(function (v, i) {
+            $sel.append(
+              '<option value="' +
+                i +
+                '">' +
+                v.name +
+                " (" +
+                v.lang +
+                ")</option>"
+            );
+          });
+        }
+        $("#voiceWarn").toggleClass("hidden", voiceReady);
+      }
+      if ("speechSynthesis" in window) {
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+      function speak(txt) {
+        if (!("speechSynthesis" in window)) return;
+        var u = new SpeechSynthesisUtterance(txt);
+        var vi = parseInt($("#voiceSelect").val() || "0", 10);
+        if (VOICES[vi]) u.voice = VOICES[vi];
+        u.rate = parseFloat($("#rate").val() || "1");
+        u.volume = parseFloat($("#volume").val() || "1");
+        try {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        } catch (e) {}
+      }
+
+      // ===== Router =====
+      function showSection(sel) {
+        $(".section").addClass("hidden");
+        $(sel).removeClass("hidden");
+        $(".tab")
+          .removeClass("bg-sky-100 text-sky-900")
+          .addClass("text-slate-800");
+        $('.tab[data-section="' + sel + '"]').addClass(
+          "bg-sky-100 text-sky-900"
+        );
+      }
+
+      // ===== Visor de páginas SVG =====
+      var PAGE_TOTAL = 32; // ajusta si tu libro tiene más/menos páginas
+      var pageIdx = 1;
+      function pagePath(i) {
+        return "book/page_" + i + ".svg";
+      }
+      function renderPage() {
+        $("#pageNum").text(pageIdx);
+        $("#pageTotal").text(PAGE_TOTAL);
+        var url = pagePath(pageIdx);
+        var $img = $("#bookImg");
+        $img
+          .off("error")
+          .attr("src", url)
+          .on("error", function () {
+            $(this).attr("alt", "No se encontró la imagen: " + url);
+          });
+      }
+      function viewerIsVisible() {
+        return $("#viewer").is(":visible");
+      }
+      function nextPage() {
+        pageIdx = Math.min(PAGE_TOTAL, pageIdx + 1);
+        renderPage();
+      }
+      function prevPage() {
+        pageIdx = Math.max(1, pageIdx - 1);
+        renderPage();
+      }
+      $(document).on("keydown", function (e) {
+        if (!viewerIsVisible()) return;
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          nextPage();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          prevPage();
+        }
+      });
+      (function () {
+        var startX = null;
+        var el = document.querySelector("#viewer .page-viewport");
+        if (el) {
+          el.addEventListener(
+            "touchstart",
+            function (ev) {
+              if (!viewerIsVisible()) return;
+              startX =
+                ev.touches && ev.touches[0] ? ev.touches[0].clientX : null;
+            },
+            { passive: true }
+          );
+          el.addEventListener(
+            "touchend",
+            function (ev) {
+              if (!viewerIsVisible() || startX === null) return;
+              var x =
+                ev.changedTouches && ev.changedTouches[0]
+                  ? ev.changedTouches[0].clientX
+                  : startX;
+              var dx = x - startX;
+              if (Math.abs(dx) > 40) {
+                if (dx < 0) nextPage();
+                else prevPage();
+              }
+              startX = null;
+            },
+            { passive: true }
+          );
+        }
+      })();
+      $("#fullBtn").on("click", function () {
+        var el = document.querySelector("#viewer .page-viewport");
+        if (!document.fullscreenElement) {
+          if (el && el.requestFullscreen) el.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      });
+
+      // ===== Vowels game =====
+      var vowelTarget = "a";
+      function renderVowels() {
+        vowelTarget = VOWELS[rand(VOWELS.length)];
+        speak(vowelTarget);
+        var opts = shuffle(VOWELS.slice()).slice(0, 4);
+        if (opts.indexOf(vowelTarget) === -1) {
+          opts[0] = vowelTarget;
+        }
+        var $grid = $("#vowels .grid");
+        $grid.empty();
+        opts.forEach(function (v) {
+          var $b = $(
+            '<button class="option-btn text-3xl font-black px-4 py-6 rounded-2xl bg-sky-100 hover:bg-sky-200">' +
+              v +
+              "</button>"
+          );
+          $b.on("click", function () {
+            if (v === vowelTarget) {
+              $b.removeClass("bg-sky-100 hover:bg-sky-200").addClass(
+                "bg-emerald-200"
+              );
+              $("#vowelsMsg").html("✅ ¡Correcto! +1 ⭐");
+              addStar(1);
+              setTimeout(renderVowels, 700);
+            } else {
+              $b.removeClass("bg-sky-100 hover:bg-sky-200").addClass(
+                "bg-rose-200"
+              );
+              $("#vowelsMsg").text("Inténtalo otra vez.");
+            }
+          });
+          $grid.append($b);
+        });
+      }
+
+      // ===== Sílabas =====
+      var activeConsonants = DEFAULT_CONSONANTS.slice();
+      function renderConsonantChecks() {
+        var $box = $("#consonantsBox");
+        $box.empty();
+        DEFAULT_CONSONANTS.forEach(function (c) {
+          var id = "c_" + c;
+          var on = activeConsonants.indexOf(c) !== -1;
+          var $item = $(
+            '<label class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border ' +
+              (on ? "bg-emerald-50 border-emerald-200" : "bg-white") +
+              '">\
+          <input type="checkbox" id="' +
+              id +
+              '" ' +
+              (on ? "checked" : "") +
+              '/>\
+          <span class="font-bold">' +
+              c +
+              "</span>\
+        </label>"
+          );
+          $item.find("input").on("change", function () {
+            if (this.checked) {
+              if (activeConsonants.indexOf(c) === -1) activeConsonants.push(c);
+            } else {
+              activeConsonants = activeConsonants.filter(function (x) {
+                return x !== c;
+              });
+            }
+            buildSylBoard();
+            fillBallTarget();
+          });
+          $box.append($item);
+        });
+      }
+      function buildSylBoard() {
+        var list = genSyllables(activeConsonants);
+        var $b = $("#sylBoard");
+        $b.empty();
+        list.forEach(function (s) {
+          var $btn = $(
+            '<button class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200">' +
+              s +
+              "</button>"
+          );
+          $btn.on("click", function () {
+            speak(s);
+          });
+          $b.append($btn);
+        });
+      }
+      var sylAnswer = "";
+      function nextSylQuiz() {
+        var list = genSyllables(activeConsonants);
+        if (list.length < 4) {
+          $("#sylMsg").text("Activa más consonantes en Ajustes.");
+          return;
+        }
+        sylAnswer = list[rand(list.length)];
+        speak(sylAnswer);
+        $("#sylQuestion").text("¿Cuál sílaba escuchaste?");
+        var opts = shuffle(
+          [sylAnswer].concat(
+            shuffle(
+              list.filter(function (x) {
+                return x !== sylAnswer;
+              })
+            ).slice(0, 3)
+          )
+        );
+        var $box = $("#sylOptions");
+        $box.empty();
+        opts.forEach(function (opt) {
+          var $b = $(
+            '<button class="option-btn px-3 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 font-semibold">' +
+              opt +
+              "</button>"
+          );
+          $b.on("click", function () {
+            var correct = opt === sylAnswer;
+            $b.removeClass("bg-slate-100 hover:bg-slate-200").addClass(
+              correct ? "bg-emerald-200" : "bg-rose-200"
+            );
+            $("#sylMsg").html(
+              correct
+                ? "✅ ¡Bien! +1 ⭐"
+                : "❌ Ups, era <b>" + sylAnswer + "</b>"
+            );
+            if (correct) addStar(1);
+          });
+          $box.append($b);
+        });
+      }
+
+      // ===== Escucha y elige (palabras) =====
+      var listenIdx = 0;
+      var listenAnswer = "";
+      function nextListen() {
+        if (WORDS.length < 4) {
+          $("#listenMsg").text("Agrega más palabras en Ajustes.");
+          return;
+        }
+        listenIdx = rand(WORDS.length);
+        listenAnswer = WORDS[listenIdx].word;
+        $("#listenWord").addClass("hidden").text(listenAnswer);
+        var pool = shuffle(
+          WORDS.map(function (w) {
+            return w.word;
+          })
+        );
+        var opts = shuffle(
+          [listenAnswer].concat(
+            pool
+              .filter(function (w) {
+                return w !== listenAnswer;
+              })
+              .slice(0, 3)
+          )
+        );
+        var $box = $("#listenOptions");
+        $box.empty();
+        opts.forEach(function (opt) {
+          var $b = $(
+            '<button class="option-btn px-3 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-lg font-semibold">' +
+              opt +
+              "</button>"
+          );
+          $b.on("click", function () {
+            var ok = opt === listenAnswer;
+            $b.removeClass("bg-slate-100 hover:bg-slate-200").addClass(
+              ok ? "bg-emerald-200" : "bg-rose-200"
+            );
+            $("#listenMsg").html(
+              ok ? "✅ ¡Excelente! +1 ⭐" : "❌ Era <b>" + listenAnswer + "</b>"
+            );
+            if (ok) addStar(1);
+          });
+          $box.append($b);
+        });
+        speak(listenAnswer);
+      }
+
+      // ===== Globos =====
+      var rafId = null;
+      var running = false;
+      var balloons = [];
+      var ok = 0,
+        bad = 0;
+      var spawnTimer = 0;
+      function fillBallTarget() {
+        var list = genSyllables(activeConsonants);
+        var $s = $("#ballTarget");
+        $s.empty();
+        list.slice(0, 300).forEach(function (s) {
+          $s.append("<option>" + s + "</option>");
+        });
+      }
+      function spawnBalloon() {
+        var zone = document.getElementById("ballZone");
+        var W = zone.clientWidth;
+        var H = zone.clientHeight;
+        var t = $("#ballTarget").val();
+        var list = genSyllables(activeConsonants);
+        var isTarget = Math.random() < 0.45;
+        var text = isTarget ? t : list[rand(list.length)];
+        var left = Math.max(8, Math.min(W - 80, rand(W - 80)));
+        var speed =
+          0.4 + parseInt($("#ballSpeed").val(), 10) * 0.3 + Math.random() * 0.3;
+        var el = document.createElement("div");
+        el.className = "balloon bg-white";
+        el.style.left = left + "px";
+        el.style.bottom = "-80px";
+        el.textContent = text;
+        el.style.border = "2px solid rgba(14,165,233,.3)";
+        el.style.background =
+          "linear-gradient(180deg, rgba(240,249,255,1), rgba(224,242,254,1))";
+        el.style.fontWeight = "700";
+        el.style.borderRadius = "9999px";
+        var b = {
+          el: el,
+          y: -80,
+          speed: speed * 16,
+          target: isTarget,
+          clicked: false,
+        };
+        el.addEventListener("click", function () {
+          if (b.clicked) return;
+          b.clicked = true;
+          if (b.target) {
+            el.style.background = "#bbf7d0";
+            ok++;
+            addStar(1);
+          } else {
+            el.style.background = "#fecaca";
+            bad++;
+          }
+          updateBallStats();
+          setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          }, 80);
+        });
+        zone.appendChild(el);
+        balloons.push(b);
+      }
+      function updateBallStats() {
+        $("#ballOk").text(ok);
+        $("#ballBad").text(bad);
+      }
+      function tick() {
+        var zone = document.getElementById("ballZone");
+        var H = zone.clientHeight;
+        var now = performance.now();
+        if (!tick.last) tick.last = now;
+        var dt = now - tick.last;
+        tick.last = now;
+        balloons.forEach(function (b) {
+          b.y += b.speed;
+          b.el.style.bottom = b.y + "px";
+        });
+        balloons = balloons.filter(function (b) {
+          if (b.y > H + 20) {
+            if (b.target && !b.clicked) {
+              bad++;
+              updateBallStats();
+            }
+            if (b.el.parentNode) b.el.parentNode.removeChild(b.el);
+            return false;
+          }
+          return true;
+        });
+        spawnTimer += dt;
+        var interval = 700 - parseInt($("#ballSpeed").val(), 10) * 90;
+        if (spawnTimer > interval) {
+          spawnTimer = 0;
+          spawnBalloon();
+        }
+        if (running) rafId = requestAnimationFrame(tick);
+      }
+      function startBalloons() {
+        if (running) return;
+        running = true;
+        tick.last = null;
+        rafId = requestAnimationFrame(tick);
+      }
+      function pauseBalloons() {
+        running = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      function resetBalloons() {
+        pauseBalloons();
+        ok = 0;
+        bad = 0;
+        updateBallStats();
+        balloons.forEach(function (b) {
+          if (b.el.parentNode) b.el.parentNode.removeChild(b.el);
+        });
+        balloons = [];
+      }
+
+      // ===== Arma la palabra =====
+      function pickWord() {
+        return WORDS[rand(WORDS.length)];
+      }
+      var buildCurrent = null;
+      function newBuild() {
+        if (WORDS.length === 0) {
+          $("#buildMsg").text("Agrega palabras en Ajustes.");
+          return;
+        }
+        buildCurrent = pickWord();
+        $("#buildTarget").text("Palabra: " + buildCurrent.word);
+        $("#dropZone").empty();
+        var slots = buildCurrent.syl.length;
+        var i;
+        for (i = 0; i < slots; i++) {
+          (function () {
+            var slot = $(
+              '<div data-idx="' +
+                i +
+                '" class="droppable grid place-items-center w-20 h-14 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"></div>'
+            );
+            slot.on("dragover", function (e) {
+              e.preventDefault();
+              slot.addClass("ring-2 ring-sky-300");
+            });
+            slot.on("dragleave", function () {
+              slot.removeClass("ring-2 ring-sky-300");
+            });
+            slot.on("drop", function (e) {
+              e.preventDefault();
+              slot.removeClass("ring-2 ring-sky-300");
+              var id = e.originalEvent.dataTransfer.getData("text/plain");
+              var $tile = $("#" + id);
+              slot.empty().append($tile.removeClass("opacity-70"));
+              checkBuild();
+            });
+            $("#dropZone").append(slot);
+          })();
+        }
+        var pool = shuffle(buildCurrent.syl.slice());
+        var $tiles = $("#tiles");
+        $tiles.empty();
+        pool.forEach(function (sy, idx) {
+          var id = "tile_" + idx + "_" + Date.now();
+          var $t = $(
+            '<div id="' +
+              id +
+              '" draggable="true" class="draggable px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-semibold text-center">' +
+              sy +
+              "</div>"
+          );
+          $t.on("dragstart", function (e) {
+            e.originalEvent.dataTransfer.setData("text/plain", id);
+            $t.addClass("opacity-70");
+          });
+          $t.on("dragend", function () {
+            $t.removeClass("opacity-70");
+          });
+          $tiles.append($t);
+        });
+        $("#buildMsg").text("Arrastra cada sílaba a su lugar.");
+      }
+      function checkBuild() {
+        if (!buildCurrent) return;
+        var slots = $("#dropZone .droppable");
+        var arr = [];
+        slots.each(function () {
+          arr.push($(this).text().trim());
+        });
+        if (
+          arr.filter(function (x) {
+            return !!x;
+          }).length !== buildCurrent.syl.length
+        )
+          return;
+        var okb = arr.every(function (s, i) {
+          return s === buildCurrent.syl[i];
+        });
+        $("#buildMsg").html(
+          okb ? "✅ ¡Perfecto! +2 ⭐" : "❌ Revisa el orden."
+        );
+        if (okb) addStar(2);
+      }
+
+      // ===== Eventos de inicio =====
+      $(document).ready(function () {
+        $("#year").text(new Date().getFullYear());
+        renderStars();
+        $(".tab").on("click", function () {
+          showSection($(this).data("section"));
+        });
+        showSection("#home");
+
+        // Visor
+        renderPage();
+        $("#prevPage").on("click", function () {
+          prevPage();
+        });
+        $("#nextPage").on("click", function () {
+          nextPage();
+        });
+        $("#zoom").on("input", function () {
+          $("#bookImg").css("transform", "scale(" + this.value / 100 + ")");
+        });
+
+        // Vowels
+        renderVowels();
+        $("#vowelsHear").on("click", function () {
+          speak(vowelTarget);
+        });
+
+        // Sílabas
+        renderConsonantChecks();
+        buildSylBoard();
+        nextSylQuiz();
+        $("#sylRehear").on("click", function () {
+          speak(sylAnswer);
+        });
+        $("#sylNext").on("click", function () {
+          nextSylQuiz();
+        });
+
+        // Listen
+        nextListen();
+        $("#listenHear").on("click", function () {
+          speak(listenAnswer);
+        });
+        $("#listenNext").on("click", function () {
+          nextListen();
+        });
+
+        // Globos
+        fillBallTarget();
+        $("#ballStart").on("click", function () {
+          startBalloons();
+        });
+        $("#ballPause").on("click", function () {
+          pauseBalloons();
+        });
+        $("#ballReset").on("click", function () {
+          resetBalloons();
+        });
+
+        // Build
+        newBuild();
+        $("#buildNew").on("click", function () {
+          newBuild();
+        });
+        $("#buildHear").on("click", function () {
+          if (buildCurrent) speak(buildCurrent.word);
+        });
+
+        // Ajustes palabras
+        $("#saveWords").on("click", function () {
+          var list = parseWords($("#wordsInput").val());
+          if (list.length) {
+            WORDS = list;
+            nextListen();
+            newBuild();
+            alert("¡Palabras guardadas!");
+          } else {
+            alert(
+              'No se encontraron líneas válidas. Usa el formato "palabra; si-la-bas".'
+            );
+          }
+        });
+
+        // Reset progreso
+        $("#btnResetProgress").on("click", function () {
+          if (confirm("¿Borrar estrellas guardadas?")) setStars(0);
+        });
+      });
+    </script>
+  </body>
+</html>
