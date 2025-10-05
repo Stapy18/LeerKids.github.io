@@ -1,10 +1,32 @@
-<!DOCTYPE html>
-<html lang="es">
+﻿<!DOCTYPE html>
+<html lang="es" class="">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LeerKids — Aprende a leer (ES)</title>
+
+    <!-- Aplica el tema ANTES de pintar (default: light) -->
+    <script>
+      (function setInitialTheme() {
+        try {
+          var key = "leerkids-theme";
+          var saved = localStorage.getItem(key) || "light"; // light por defecto
+          if (saved === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CONFIG de Tailwind: debe ir DESPUÉS del CDN -->
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,12 +40,7 @@
       body {
         font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto;
       }
-      .clamp-2 {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        -webkit-line-clamp: 2;
-      }
+
       /* Globos */
       @keyframes float-up {
         0% {
@@ -47,13 +64,13 @@
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
         animation: float-up var(--dur, 4s) linear forwards;
         user-select: none;
         -webkit-user-select: none;
         color: #fff;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25),
-          0 2px 6px rgba(0, 0, 0, 0.25);
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35),
+          0 2px 6px rgba(0, 0, 0, 0.35);
       }
       .balloon::after {
         content: "";
@@ -65,13 +82,14 @@
         height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 10px solid rgba(0, 0, 0, 0.25);
+        border-top: 10px solid rgba(0, 0, 0, 0.35);
       }
       .balloon.pop {
         transform: scale(0.6);
         opacity: 0.1;
         transition: 0.25s ease;
       }
+
       /* Palabras/frases */
       .word-btn {
         display: flex;
@@ -101,52 +119,60 @@
       }
     </style>
 
-    <!-- Carga SOLO el archivo JS de lecciones -->
+    <!-- Tus lecciones externas -->
     <script src="lessons.js"></script>
   </head>
-  <body class="bg-slate-50 text-slate-900">
-    <!-- Header compacto en móviles -->
+  <body
+    class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors"
+  >
+    <!-- Header -->
     <header
-      class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200"
+      class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/85 backdrop-blur border-b border-slate-200 dark:border-slate-800"
     >
       <div
         class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-2"
       >
-        <button
-          id="toggleMenu"
-          class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 text-slate-700"
-          title="Abrir/cerrar lecciones"
-        >
-          ☰
-        </button>
         <span
-          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-900 font-extrabold"
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-900 font-extrabold dark:bg-sky-900/40 dark:border-sky-800 dark:text-sky-100"
         >
           📖 <span class="hidden xs:inline">LeerKids</span>
           <span
-            class="text-[11px] font-black bg-sky-100 border border-sky-200 rounded-full px-2 py-[2px]"
+            class="text-[11px] font-black bg-sky-100 border border-sky-200 rounded-full px-2 py-[2px] dark:bg-sky-800/60 dark:border-sky-700"
             >MVP</span
           >
         </span>
-        <div class="text-sm text-slate-600 hidden sm:block">
+
+        <div class="text-sm text-slate-600 hidden sm:block dark:text-slate-300">
           Aprende a leer en español
         </div>
+
         <div class="ml-auto flex items-center gap-1 sm:gap-2">
+          <!-- Theme toggle -->
+          <button
+            id="themeToggle"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            title="Cambiar tema"
+          >
+            <span id="themeIcon" aria-hidden="true">🌙</span>
+            <span class="hidden sm:inline text-sm">Tema</span>
+          </button>
+
           <button
             id="btnReset"
-            class="px-3 py-2 rounded-xl border border-slate-200 font-bold hidden sm:inline-flex"
+            class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 font-bold hidden sm:inline-flex dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           >
             Reiniciar
           </button>
           <button
             id="btnResetSm"
-            class="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200"
+            class="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             title="Reiniciar"
           >
             ↻
           </button>
+
           <label
-            class="flex items-center gap-1 text-sm px-2 py-1 rounded-xl border border-slate-200"
+            class="flex items-center gap-1 text-sm px-2 py-1 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
           >
             <span aria-hidden="true">🔊</span>
             <input
@@ -162,87 +188,78 @@
       </div>
     </header>
 
-    <!-- Layout -->
+    <!-- Layout (solo columna central) -->
     <main class="max-w-6xl mx-auto px-3 sm:px-4 py-4">
-      <div class="grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-4">
-        <!-- Sidebar -->
-        <aside
-          id="sidebar"
-          class="md:sticky md:top-20 h-max bg-white border border-slate-200 rounded-2xl shadow-sm p-3 hidden md:block"
-        >
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="font-extrabold text-lg">Lecciones</h2>
-          </div>
-          <div id="lessonList" class="space-y-3" role="list"></div>
-        </aside>
-
-        <!-- Main -->
-        <section class="space-y-4">
-          <div
-            id="home"
-            class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4"
+      <section class="space-y-4">
+        <!-- Home agrupada por categorías -->
+        <div id="home" class="bg-transparent">
+          <h1
+            class="text-2xl font-extrabold px-1 text-slate-900 dark:text-sky-100"
           >
-            <h1 class="text-2xl font-extrabold">¡Vamos a leer!</h1>
-            <p class="text-sm text-slate-600">
-              Módulos: vocales → sílabas → palabras → frases.
-            </p>
+            ¡Vamos a leer!
+          </h1>
+          <p class="text-sm text-slate-600 px-1 dark:text-slate-300">
+            Módulos: vocales → sílabas → palabras → frases.
+          </p>
+          <div id="homeGrouped" class="space-y-4 mt-3"></div>
+        </div>
+
+        <!-- Vista de lección -->
+        <div
+          id="lessonView"
+          class="hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-4 dark:bg-slate-900/60 dark:border-slate-800"
+          role="region"
+          aria-label="Actividad de la lección"
+        >
+          <div class="flex items-center gap-3 flex-wrap">
+            <button
+              id="btnBack"
+              class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold dark:border-slate-700 dark:bg-slate-900"
+            >
+              ← Volver
+            </button>
             <div
-              id="homeShortcuts"
-              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3"
+              id="lessonTitle"
+              class="font-extrabold text-slate-900 dark:text-sky-100"
+            ></div>
+            <div class="text-amber-500 font-black">
+              ⭐ <span id="starCount">0</span>
+            </div>
+          </div>
+          <div
+            class="h-3 bg-slate-200 rounded-full overflow-hidden mt-2 dark:bg-slate-800"
+          >
+            <div
+              id="progressBar"
+              class="h-3 bg-gradient-to-r from-emerald-500 to-sky-500 w-0"
             ></div>
           </div>
-
-          <div
-            id="lessonView"
-            class="hidden bg-white border border-slate-200 rounded-2xl shadow-sm p-4"
-            role="region"
-            aria-label="Actividad de la lección"
-          >
-            <div class="flex items-center gap-3 flex-wrap">
-              <button
-                id="btnBack"
-                class="px-3 py-2 rounded-xl border border-slate-200 font-bold"
-              >
-                ← Volver
-              </button>
-              <div id="lessonTitle" class="font-extrabold"></div>
-              <div class="text-amber-500 font-black">
-                ⭐ <span id="starCount">0</span>
-              </div>
-            </div>
-            <div class="h-3 bg-slate-200 rounded-full overflow-hidden mt-2">
-              <div
-                id="progressBar"
-                class="h-3 bg-gradient-to-r from-emerald-500 to-sky-500 w-0"
-              ></div>
-            </div>
-            <div id="activity" class="mt-3"></div>
-            <div class="flex items-center gap-2 mt-3">
-              <button
-                id="btnRepeat"
-                class="px-3 py-2 rounded-xl border border-slate-200"
-              >
-                🔊 Repetir
-              </button>
-              <button
-                id="btnNext"
-                class="btn-next px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
-              >
-                Siguiente ▷
-              </button>
-            </div>
+          <div id="activity" class="mt-3"></div>
+          <div class="flex items-center gap-2 mt-3">
+            <button
+              id="btnRepeat"
+              class="px-3 py-2 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+            >
+              🔊 Repetir
+            </button>
+            <button
+              id="btnNext"
+              class="btn-next px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
+            >
+              Siguiente ▷
+            </button>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
 
     <div
       id="toast"
-      class="fixed bottom-4 right-4 bg-slate-900 text-white px-3 py-2 rounded-xl shadow-lg opacity-0 translate-y-2 transition"
+      class="fixed bottom-4 right-4 bg-slate-900 text-white px-3 py-2 rounded-xl shadow-lg opacity-0 translate-y-2 transition dark:bg-slate-950"
     ></div>
 
     <script>
-      /* ========= Carga de lecciones SOLO desde lessons.js ========= */
+      /* ========= Lecciones desde lessons.js ========= */
       let LESSONS = [];
       (function initLessonsFromJS() {
         if (
@@ -255,7 +272,6 @@
           window.LEERKIDS_LESSONS = [];
         }
         LESSONS = window.LEERKIDS_LESSONS.map((ls) => {
-          // Normaliza speakText: acepta "lower" o "x"
           let fn = (t) => t;
           if (ls.speakText === "lower") fn = (t) => String(t).toLowerCase();
           else if (ls.speakText === "x" || ls.speakText == null) fn = (t) => t;
@@ -348,8 +364,12 @@
         state.canAdvance = !!ok;
         $("#btnNext").prop("disabled", !ok);
       }
+      function shortTitle(s) {
+        const base = (s || "").split("(")[0].trim();
+        return base.length > 32 ? base.slice(0, 32) + "…" : base;
+      }
 
-      /* ========= Agrupar por categoría / subcategoría ========= */
+      /* ========= Agrupar por categoría/subcategoría ========= */
       function groupByCategory(lessons) {
         const catMap = {};
         for (const ls of lessons) {
@@ -357,128 +377,133 @@
           const sub = ls.subcategory || null;
           catMap[cat] = catMap[cat] || {};
           if (sub) {
-            catMap[cat][sub] = catMap[cat][sub] || [];
-            catMap[cat][sub].push(ls);
+            (catMap[cat][sub] ||= []).push(ls);
           } else {
-            catMap[cat]._root = catMap[cat]._root || [];
-            catMap[cat]._root.push(ls);
+            (catMap[cat]._root ||= []).push(ls);
           }
         }
         return catMap;
       }
 
-      /* ========= UI: Sidebar / Home ========= */
-      function renderLessonList() {
-        const $list = $("#lessonList").empty();
+      /* ========= HOME AGRUPADA ========= */
+      function renderHomeShortcutsGrouped() {
+        const $wrap = $("#homeGrouped").empty();
         const groups = groupByCategory(LESSONS);
 
         Object.keys(groups)
           .sort()
           .forEach((cat) => {
-            const $cat = $(
-              '<details open class="border border-slate-200 rounded-xl overflow-hidden bg-white"></details>'
+            const $section = $(
+              '<section class="bg-white border border-slate-200 rounded-2xl shadow-sm dark:bg-slate-900/60 dark:border-slate-800"></section>'
             );
-            const $summary = $(
-              '<summary class="cursor-pointer select-none px-3 py-2 font-extrabold bg-slate-50 border-b border-slate-200 text-slate-800 flex items-center justify-between"></summary>'
+
+            // Encabezado colapsado de inicio
+            const $header = $(
+              '<button type="button" class="w-full flex items-center justify-between px-4 py-3 rounded-t-2xl bg-slate-50 border-b border-slate-200 dark:bg-slate-900/70 dark:border-slate-800"></button>'
             );
-            $summary.append("<span>" + cat + "</span>");
-            $summary.append(
-              '<span class="text-slate-500 text-xs">toca para contraer</span>'
+            $header.append(
+              '<h3 class="text-base sm:text-lg font-extrabold text-slate-800 dark:text-sky-100">' +
+                cat +
+                "</h3>"
             );
-            $cat.append($summary);
+            const $chev = $(`
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-md text-slate-500 border border-slate-200 bg-white dark:text-slate-300 dark:border-slate-700 dark:bg-slate-900">
+              <svg class="w-4 h-4 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </span>`);
+            $header.append($chev);
 
-            const $container = $('<div class="p-2 space-y-2"></div>');
+            const $content = $('<div class="p-3 space-y-3 hidden"></div>'); // hidden por defecto
+            let collapsed = true;
+            $chev.find("svg").css("transform", "rotate(-90deg)"); // cerrado
 
-            // Lecciones sin subcategoría
-            const root = groups[cat]._root || [];
-            root.forEach((ls) => $container.append(lessonItem(ls)));
-
-            // Subcategorías
-            Object.keys(groups[cat])
-              .filter((k) => k !== "_root")
-              .sort()
-              .forEach((sub) => {
-                const $sub = $('<div class="mt-2"></div>');
-                $sub.append(
-                  '<div class="text-xs font-black uppercase tracking-wide text-slate-500 px-2 mb-1">' +
-                    sub +
-                    "</div>"
+            $header.on("click", () => {
+              collapsed = !collapsed;
+              $content.toggleClass("hidden", collapsed);
+              $chev
+                .find("svg")
+                .css(
+                  "transform",
+                  collapsed ? "rotate(-90deg)" : "rotate(0deg)"
                 );
-                groups[cat][sub].forEach((ls) => $sub.append(lessonItem(ls)));
-                $container.append($sub);
-              });
+            });
+            $section.append($header);
 
-            $cat.append($container);
-            $list.append($cat);
+            // Si es SÍLABAS, unimos todos los subgrupos
+            if (
+              cat.toLowerCase() === "sílabas" ||
+              cat.toLowerCase() === "silabas"
+            ) {
+              const all = [];
+              const root = groups[cat]._root || [];
+              all.push(...root);
+              Object.keys(groups[cat])
+                .filter((k) => k !== "_root")
+                .forEach((sub) => {
+                  all.push(...groups[cat][sub]);
+                });
+              const $grid = $(
+                '<div class="grid [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] gap-3"></div>'
+              );
+              all.forEach((ls) => $grid.append(homeCard(ls)));
+              $content.append($grid);
+            } else {
+              const root = groups[cat]._root || [];
+              if (root.length) {
+                const $grid = $(
+                  '<div class="grid [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] gap-3"></div>'
+                );
+                root.forEach((ls) => $grid.append(homeCard(ls)));
+                $content.append($grid);
+              }
+              Object.keys(groups[cat])
+                .filter((k) => k !== "_root")
+                .sort()
+                .forEach((sub) => {
+                  const $sub = $('<div class=""></div>');
+                  $sub.append(
+                    '<div class="text-[11px] font-black uppercase tracking-wide text-slate-500 px-1 mb-1 dark:text-slate-400">' +
+                      sub +
+                      "</div>"
+                  );
+                  const $grid = $(
+                    '<div class="grid [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] gap-3"></div>'
+                  );
+                  groups[cat][sub].forEach((ls) => $grid.append(homeCard(ls)));
+                  $sub.append($grid);
+                  $content.append($sub);
+                });
+            }
+
+            $section.append($content);
+            $wrap.append($section);
           });
       }
 
-      function lessonItem(ls) {
-        const prog = getLessonProgress(ls.id);
-        const isDone = (prog.done || 0) >= ls.items.length;
-        const $card = $(
-          '<div class="flex items-center justify-between gap-2 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer" tabindex="0" role="button" data-id="' +
+      function homeCard(ls) {
+        let big = "📚";
+        if (ls.kind === "choice-sound") {
+          big = (ls.pool?.[0] || "") + (ls.pool?.[1] ? " • " + ls.pool[1] : "");
+        } else if (ls.kind === "picture-pick") {
+          big = ls.pool?.[0]?.emoji || "🖼️";
+        } else if (ls.kind === "build-phrase") {
+          big = "🧩";
+        } else if (ls.kind === "balloon-hunt") {
+          big = "🎈";
+        }
+        return $(
+          '<button class="flex flex-col items-center justify-start gap-1 p-4 h-auto min-h-[108px] bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow transition active:scale-[.99] text-center dark:bg-slate-900 dark:border-slate-800" data-jump="' +
             ls.id +
             '">\
-        <div class="min-w-0">\
-          <div class="font-extrabold">' +
-            ls.title +
-            '</div>\
-          <div class="text-xs text-slate-600">Completado: ' +
-            Math.min(prog.done || 0, ls.items.length) +
-            "/" +
-            ls.items.length +
-            '</div>\
-        </div>\
-        <div class="inline-flex items-center justify-center gap-1 min-w-[92px] px-2 py-1 text-xs rounded-full whitespace-nowrap tabular-nums ' +
-            (isDone
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-slate-100 text-slate-700 border border-slate-200") +
-            '">' +
-            (isDone ? "✅ Completado" : "⭐ " + (prog.stars || 0)) +
-            "</div>\
-      </div>"
-        );
-        $card.on("click keypress", (e) => {
-          if (e.type === "click" || e.key === "Enter") {
-            startLesson(ls.id);
-          }
-        });
-        return $card;
-      }
-
-      function shortTitle(s) {
-        const base = (s || "").split("(")[0].trim();
-        return base.length > 18 ? base.slice(0, 18) + "…" : base;
-      }
-      function renderHomeShortcuts() {
-        const $grid = $("#homeShortcuts").empty();
-        LESSONS.forEach((ls) => {
-          let big = "📚";
-          if (ls.kind === "choice-sound") {
-            big =
-              (ls.pool?.[0] || "") + (ls.pool?.[1] ? " • " + ls.pool[1] : "");
-          } else if (ls.kind === "picture-pick") {
-            big = ls.pool?.[0]?.emoji || "🖼️";
-          } else if (ls.kind === "build-phrase") {
-            big = "🧩";
-          } else if (ls.kind === "balloon-hunt") {
-            big = "🎈";
-          }
-          const $btn = $(
-            '<button class="flex flex-col items-center justify-center gap-1 p-4 h-28 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow transition" data-jump="' +
-              ls.id +
-              '">\
           <span class="text-xl font-extrabold">' +
-              big +
-              '</span>\
-          <span class="text-xs text-slate-700 font-extrabold clamp-2">' +
-              shortTitle(ls.title) +
-              "</span>\
+            big +
+            '</span>\
+          <span class="text-xs sm:text-[13px] text-slate-700 font-extrabold leading-snug dark:text-slate-200">' +
+            shortTitle(ls.title) +
+            "</span>\
         </button>"
-          );
-          $grid.append($btn);
-        });
+        );
       }
 
       /* ========= Flujo de lección ========= */
@@ -492,9 +517,6 @@
         $("#lessonTitle").text(state.current.title);
         $("#starCount").text(state.stars);
         renderStep();
-        if (window.innerWidth < 768) {
-          $("#sidebar").addClass("hidden");
-        }
       }
 
       function renderStep() {
@@ -511,14 +533,14 @@
             opts[Math.floor(Math.random() * opts.length)] = item;
           }
           $("#activity").html(
-            '<div class="text-sm text-slate-600">' +
+            '<div class="text-sm text-slate-600 dark:text-slate-300">' +
               ls.prompt +
               '</div>\
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
               opts
                 .map(
                   (o) =>
-                    '<div class="flex items-center justify-center h-20 text-2xl font-black bg-white border border-slate-200 rounded-2xl cursor-pointer" data-val="' +
+                    '<div class="flex items-center justify-center h-20 text-2xl font-black bg-white border border-slate-200 rounded-2xl cursor-pointer dark:bg-slate-900 dark:border-slate-800" data-val="' +
                     o +
                     '">' +
                     o +
@@ -559,17 +581,17 @@
             opts[Math.floor(Math.random() * opts.length)] = needle;
           }
           $("#activity").html(
-            '<div class="text-sm text-slate-600">' +
+            '<div class="text-sm text-slate-600 dark:text-slate-300">' +
               ls.prompt +
               '</div>\
-          <div class="flex items-center justify-center h-24 text-6xl">' +
+            <div class="flex items-center justify-center h-24 text-6xl">' +
               needle.emoji +
               '</div>\
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">' +
               opts
                 .map(
                   (o) =>
-                    '<div class="flex items-center justify-center h-16 text-xl font-black bg-white border border-slate-200 rounded-2xl cursor-pointer" data-val="' +
+                    '<div class="flex items-center justify-center h-16 text-xl font-black bg-white border border-slate-200 rounded-2xl cursor-pointer dark:bg-slate-900 dark:border-slate-800" data-val="' +
                     o.w +
                     '">' +
                     o.w +
@@ -607,15 +629,15 @@
           const entry = ls.pool[item];
           const parts = shuffle(entry.parts.slice());
           $("#activity").html(
-            '<div class="text-sm text-slate-600">' +
+            '<div class="text-sm text-slate-600 dark:text-slate-300">' +
               ls.prompt +
               '</div>\
-          <div id="drop" class="min-h-[84px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2"></div>\
-          <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">' +
+            <div id="drop" class="min-h-[84px] bg-white border border-slate-200 rounded-2xl p-3 mt-2 flex flex-wrap gap-2 dark:bg-slate-900 dark:border-slate-800"></div>\
+            <div id="phraseBank" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">' +
               parts
                 .map(
                   (p, i) =>
-                    '<button class="word-btn bg-white border border-slate-200 text-base sm:text-lg cursor-pointer" data-word="' +
+                    '<button class="word-btn bg-white border border-slate-200 text-base sm:text-lg cursor-pointer dark:bg-slate-900 dark:border-slate-800" data-word="' +
                     p +
                     '" data-idx="' +
                     i +
@@ -645,7 +667,7 @@
               .prop("disabled", true)
               .addClass("opacity-50 cursor-not-allowed");
             $("#drop").append(
-              '<span class="drop-pill bg-sky-50 border border-sky-200 text-base sm:text-lg" data-part="' +
+              '<span class="drop-pill bg-sky-50 border border-sky-200 text-base sm:text-lg dark:bg-sky-900/40 dark:border-sky-800" data-part="' +
                 w +
                 '" data-idx="' +
                 idx +
@@ -694,8 +716,7 @@
           toast("Lección completa ✨");
           $("#lessonView").addClass("hidden");
           $("#home").removeClass("hidden");
-          renderLessonList();
-          renderHomeShortcuts();
+          renderHomeShortcutsGrouped();
         } else {
           renderStep();
         }
@@ -722,18 +743,18 @@
         state.balloon.target = item;
         const promptText = `${ls.prompt} ${item}. Toca ${goal}.`;
         $("#activity").html(
-          '<div class="text-sm text-slate-600">' +
+          '<div class="text-sm text-slate-600 dark:text-slate-300">' +
             promptText +
             '</div>\
-        <div class="flex items-center gap-2 mt-2 text-sm">\
-          <span class="font-extrabold">Objetivo:</span> <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">' +
+          <div class="flex items-center gap-2 mt-2 text-sm">\
+            <span class="font-extrabold">Objetivo:</span> <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800">' +
             item +
             '</span>\
-          <span class="ml-2 font-extrabold">Llevas:</span> <span id="balloonCount" class="px-2 py-1 rounded-full bg-slate-100 border border-slate-200">0/' +
+            <span class="ml-2 font-extrabold">Llevas:</span> <span id="balloonCount" class="px-2 py-1 rounded-full bg-slate-100 border border-slate-200 dark:bg-slate-900 dark:border-slate-800">0/' +
             goal +
             '</span>\
-        </div>\
-        <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3" style="height:360px;cursor:pointer;"></div>'
+          </div>\
+          <div id="balloonArea" class="relative overflow-hidden bg-gradient-to-t from-sky-50 to-white border border-slate-200 rounded-2xl mt-3 dark:from-sky-950 dark:to-slate-900 dark:border-slate-800" style="height:360px;cursor:pointer;"></div>'
         );
         const say = () => {
           speak("Toca todos los globos con la letra");
@@ -812,11 +833,36 @@
         $area.append($b);
       }
 
-      /* ========= Eventos globales ========= */
+      /* ========= Eventos ========= */
       $(function () {
         ensureVoices();
-        renderLessonList();
-        renderHomeShortcuts();
+        renderHomeShortcutsGrouped();
+
+        // THEME TOGGLE
+        const THEME_KEY = "leerkids-theme";
+        const btn = document.getElementById("themeToggle");
+        const icon = document.getElementById("themeIcon");
+        function refreshIcon() {
+          if (icon)
+            icon.textContent = document.documentElement.classList.contains(
+              "dark"
+            )
+              ? "🌞"
+              : "🌙";
+        }
+        refreshIcon();
+        if (btn) {
+          btn.addEventListener("click", () => {
+            const root = document.documentElement;
+            root.classList.toggle("dark");
+            localStorage.setItem(
+              THEME_KEY,
+              root.classList.contains("dark") ? "dark" : "light"
+            );
+            refreshIcon();
+          });
+        }
+
         $(document).on("click", "[data-jump]", function () {
           startLesson($(this).data("jump"));
         });
@@ -835,12 +881,10 @@
           if (confirm("¿Borrar progreso?")) {
             localStorage.removeItem(STORAGE_KEY);
             toast("Progreso borrado");
-            renderLessonList();
-            renderHomeShortcuts();
+            renderHomeShortcutsGrouped();
           }
         };
         $("#btnReset, #btnResetSm").on("click", doReset);
-        $("#toggleMenu").on("click", () => $("#sidebar").toggleClass("hidden"));
       });
     </script>
   </body>
