@@ -407,3 +407,30 @@ pushUnique({
     });
   });
 })();
+
+/* ====== Helpers para el juego de pareo (mayúsculas/minúsculas) ====== */
+function _lettersES() {
+  // Orden con Ñ después de N
+  return ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","Ñ","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+}
+function genCasePool() {
+  // emoji = minúscula grande que se muestra arriba; w = opción correcta (MAYÚSCULA)
+  return _lettersES().map(L => ({ w: L, emoji: L.toLowerCase() }));
+}
+function genCaseItems() {
+  // lista de rondas; puedes acortar si quieres menos
+  return _lettersES().slice();
+}
+
+/* ====== NUEVO JUEGO: Pareo mayúsculas/minúsculas ====== */
+pushUnique({
+  id: "PAREO_MAYUS_MINUS",
+  title: "Pareo: mayúsculas y minúsculas",
+  kind: "picture-pick",
+  prompt: "Elige la MAYÚSCULA que corresponde",
+  pool: genCasePool(),
+  items: genCaseItems(),
+  speakText: "lower",         // leerá la letra (ej. “a”)
+  category: "Letras",
+  subcategory: "Pareo"
+});
