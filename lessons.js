@@ -6,8 +6,9 @@
     4) Sílabas para TODO el alfabeto (B–Z y Ñ) evitando duplicados
     5) Boricuas extra, frases extra
     6) Globos sílabas (pool único) con goal=5  [conserva GLOBOS_2]
-    7) NUEVO: Globos de letras en grupos de 5 (A–Z, incluye Ñ)
-    8) NUEVO: Globos de sílabas en grupos de 5 (desde pool recopilado)
+    7) Globos de letras en grupos de 5 (A–Z, incluye Ñ)
+    8) Globos de sílabas en grupos de 5 (desde pool recopilado)
+    9) NUEVO: Pareo mayúsculas ↔ minúsculas (2 juegos separados)
 */
 
 // =====================================================
@@ -347,7 +348,7 @@ pushUnique({
 })();
 
 // =====================================================
-// 7) NUEVO — Globos de LETRAS en grupos de 5 (A–Z con Ñ)
+// 7) Globos de LETRAS en grupos de 5 (A–Z con Ñ)
 // =====================================================
 (function addBalloonLetterGroups() {
   const LETTERS = [
@@ -373,7 +374,7 @@ pushUnique({
 })();
 
 // =====================================================
-// 8) NUEVO — Globos de SÍLABAS en grupos de 5 (desde pool recopilado)
+// 8) Globos de SÍLABAS en grupos de 5 (desde pool recopilado)
 // =====================================================
 (function addBalloonSyllableGroups() {
   // Reutilizamos el pool a partir de las lecciones de Sílabas
@@ -408,29 +409,51 @@ pushUnique({
   });
 })();
 
-/* ====== Helpers para el juego de pareo (mayúsculas/minúsculas) ====== */
+// =====================================================
+// 9) NUEVO — Pareo mayúsculas ↔ minúsculas (2 juegos)
+//     (usa picture-pick para no tocar el index/app)
+// =====================================================
+
+// Helpers de letras (orden español con Ñ)
 function _lettersES() {
-  // Orden con Ñ después de N
   return ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","Ñ","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
 }
+
+// a) Minúscula → MAYÚSCULA (muestra la minúscula; eligen la mayúscula)
 function genCasePool() {
   // emoji = minúscula grande que se muestra arriba; w = opción correcta (MAYÚSCULA)
   return _lettersES().map(L => ({ w: L, emoji: L.toLowerCase() }));
 }
 function genCaseItems() {
-  // lista de rondas; puedes acortar si quieres menos
   return _lettersES().slice();
 }
-
-/* ====== NUEVO JUEGO: Pareo mayúsculas/minúsculas ====== */
 pushUnique({
   id: "PAREO_MAYUS_MINUS",
-  title: "Pareo: mayúsculas y minúsculas",
+  title: "Pareo: minúscula → MAYÚSCULA",
   kind: "picture-pick",
   prompt: "Elige la MAYÚSCULA que corresponde",
   pool: genCasePool(),
   items: genCaseItems(),
-  speakText: "lower",         // leerá la letra (ej. “a”)
+  speakText: "lower",
+  category: "Letras",
+  subcategory: "Pareo"
+});
+
+// b) MAYÚSCULA → minúscula (muestra la MAYÚSCULA; eligen la minúscula)
+function genCasePoolInverse() {
+  return _lettersES().map(L => ({ w: L.toLowerCase(), emoji: L }));
+}
+function genCaseItemsLower() {
+  return _lettersES().map(L => L.toLowerCase());
+}
+pushUnique({
+  id: "PAREO_MAYUS_A_MINUS",
+  title: "Pareo: MAYÚSCULA → minúscula",
+  kind: "picture-pick",
+  prompt: "Elige la minúscula que corresponde",
+  pool: genCasePoolInverse(),
+  items: genCaseItemsLower(),
+  speakText: "lower",
   category: "Letras",
   subcategory: "Pareo"
 });
