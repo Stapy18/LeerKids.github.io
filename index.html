@@ -31,15 +31,36 @@
         class="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-950/60 backdrop-blur"
       >
         <div
-          class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between"
+          class="mx-auto flex items-center justify-end max-w-6xl px-2 py-3 md:hidden"
         >
-          <h1 class="text-lg font-extrabold tracking-tight">Salon de Clases</h1>
-          <div class="text-xs text-slate-500">Es Divertido Aprender</div>
+          <button
+            id="menuToggle"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm"
+            aria-controls="tabBar"
+            aria-expanded="false"
+          >
+            <span>Menu</span>
+            <svg
+              class="h-5 w-5 text-slate-600 dark:text-slate-300"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 6h14M3 10h14M3 14h14"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
         </div>
         <!-- Tabs -->
         <nav
           id="tabBar"
-          class="tabs-scroll mx-auto max-w-6xl px-2 pb-2 overflow-x-auto"
+          class="tabs-scroll mx-auto mt-1 max-w-6xl px-2 pb-2 overflow-x-auto hidden md:block md:mt-3"
+          data-open="false"
         >
           <!-- Botones se inyectan por JS -->
         </nav>
@@ -94,6 +115,43 @@
 
       const tabBar = document.getElementById("tabBar");
       const viewer = document.getElementById("viewer");
+      const menuToggle = document.getElementById("menuToggle");
+      const MOBILE_BREAKPOINT = 768;
+
+      if (!tabBar.dataset.open) {
+        tabBar.dataset.open = "false";
+      }
+
+      function isMobileViewport() {
+        return window.innerWidth < MOBILE_BREAKPOINT;
+      }
+
+      function enforceMenuVisibility() {
+        if (!isMobileViewport()) {
+          tabBar.classList.remove("hidden");
+          if (menuToggle) {
+            menuToggle.setAttribute("aria-expanded", "true");
+          }
+          return;
+        }
+        const isOpen = tabBar.dataset.open === "true";
+        tabBar.classList.toggle("hidden", !isOpen);
+        if (menuToggle) {
+          menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        }
+      }
+
+      function setMenuState(open) {
+        tabBar.dataset.open = open ? "true" : "false";
+        enforceMenuVisibility();
+      }
+
+      if (menuToggle) {
+        menuToggle.addEventListener("click", () => {
+          const isOpen = tabBar.dataset.open === "true";
+          setMenuState(!isOpen);
+        });
+      }
 
       // Año actual para copyright
       document.getElementById("year").textContent = new Date().getFullYear();
@@ -137,6 +195,9 @@
         if (location.hash !== "#" + tab.id) {
           history.replaceState(null, "", "#" + tab.id);
         }
+        if (isMobileViewport()) {
+          setMenuState(false);
+        }
       }
 
       // Soporte para hash y localStorage
@@ -160,6 +221,7 @@
       function resizeViewer() {
         // Header + tabs + footer ≈ 120px; el min-h ya cubre, pero ajustamos por si acaso
         viewer.style.height = window.innerHeight - 120 + "px";
+        enforceMenuVisibility();
       }
       window.addEventListener("resize", resizeViewer);
 
