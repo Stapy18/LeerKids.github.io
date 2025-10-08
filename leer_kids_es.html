@@ -292,6 +292,8 @@
         index: 0,
         stars: 0,
         audioOn: true,
+        audioPlayer: null,
+        audioMissing: new Set(),
         cacheVoices: [],
         canAdvance: false,
         balloon: {
@@ -322,15 +324,46 @@
         p[id] = { ...getLessonProgress(id), ...data };
         saveProgress(p);
       }
+      const AUDIO_BASE_PATH = "audio";
+      const AUDIO_EXTENSION = ".wav";
       function ensureVoices() {
+        if (typeof speechSynthesis === "undefined") return;
         const load = () => {
-          state.cacheVoices = speechSynthesis.getVoices();
+          try {
+            state.cacheVoices = speechSynthesis.getVoices();
+          } catch {
+            state.cacheVoices = [];
+          }
         };
-        speechSynthesis.addEventListener("voiceschanged", load);
+        try {
+          speechSynthesis.addEventListener("voiceschanged", load);
+        } catch {}
         load();
       }
-      function speak(text) {
+      function normalizeAudioKey(text) {
+        return String(text || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "");
+      }
+      function stopCurrentAudio() {
+        if (state.audioPlayer) {
+          try {
+            state.audioPlayer.pause();
+            state.audioPlayer.currentTime = 0;
+          } catch {}
+          state.audioPlayer = null;
+        }
+      }
+      function speakWithTTS(text) {
         if (!state.audioOn) return;
+        if (
+          typeof speechSynthesis === "undefined" ||
+          typeof SpeechSynthesisUtterance === "undefined"
+        )
+          return;
         try {
           speechSynthesis.cancel();
           const u = new SpeechSynthesisUtterance(text);
@@ -338,7 +371,8 @@
             ? state.cacheVoices
             : speechSynthesis.getVoices();
           const v =
-            voices.find((v) => /^(es-|es|es_)/i.test(v.lang)) || voices[0];
+            voices.find((voice) => /^(es-|es|es_)/i.test(voice.lang)) ||
+            voices[0];
           if (v) u.voice = v;
           u.rate = 0.95;
           u.pitch = 1;
@@ -347,6 +381,61 @@
         } catch (e) {
           console.warn("No TTS:", e);
         }
+      }
+      function speak(text) {
+        if (!state.audioOn) return;
+        const phrase = String(text || "").trim();
+        if (!phrase) return;
+        try {
+          if (typeof speechSynthesis !== "undefined") {
+            speechSynthesis.cancel();
+          }
+        } catch {}
+        stopCurrentAudio();
+        const key = normalizeAudioKey(phrase);
+        if (key && !state.audioMissing.has(key)) {
+          const src = `${AUDIO_BASE_PATH}/${key}${AUDIO_EXTENSION}`;
+          const audio = new Audio(src);
+          state.audioPlayer = audio;
+          let didFallback = false;
+          const fallback = (markMissing) => {
+            if (didFallback) return;
+            didFallback = true;
+            if (markMissing) {
+              state.audioMissing.add(key);
+            }
+            if (state.audioPlayer === audio) {
+              state.audioPlayer = null;
+            }
+            speakWithTTS(phrase);
+          };
+          audio.addEventListener(
+            "error",
+            () => {
+              fallback(true);
+            },
+            { once: true }
+          );
+          audio.addEventListener(
+            "ended",
+            () => {
+              if (state.audioPlayer === audio) {
+                state.audioPlayer = null;
+              }
+            },
+            { once: true }
+          );
+          try {
+            const playPromise = audio.play();
+            if (playPromise && typeof playPromise.catch === "function") {
+              playPromise.catch(() => fallback(false));
+            }
+          } catch (e) {
+            fallback(false);
+          }
+          return;
+        }
+        speakWithTTS(phrase);
       }
       function toast(msg) {
         const el = $("#toast");
@@ -808,6 +897,14 @@
         $("#btnRepeat").on("click", () => {});
         $("#toggleAudio").on("change", function () {
           state.audioOn = this.checked;
+          if (!this.checked) {
+            stopCurrentAudio();
+            try {
+              if (typeof speechSynthesis !== "undefined") {
+                speechSynthesis.cancel();
+              }
+            } catch {}
+          }
           toast(this.checked ? "Audio activado" : "Audio desactivado");
         });
         const doReset = () => {
