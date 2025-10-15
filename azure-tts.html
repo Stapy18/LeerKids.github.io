@@ -1,0 +1,316 @@
+<!-- save as: batch-azure-tts-humanized.html -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Batch Azure TTS — Humanized (Karina es-PR, 25-per-batch)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --gap: 0.75rem;
+        --pad: 0.6rem;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          sans-serif;
+        margin: 2rem;
+        max-width: 1000px;
+      }
+      h1 {
+        margin: 0 0 1rem;
+      }
+      .row {
+        display: flex;
+        gap: var(--gap);
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      button,
+      input {
+        font: inherit;
+        padding: var(--pad);
+      }
+      ol {
+        padding-left: 1.25rem;
+      }
+      li {
+        margin: 0.25rem 0;
+      }
+      .muted {
+        opacity: 0.75;
+      }
+      .warn {
+        color: #b00020;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Batch Azure Text-to-Speech (Humanized · Browser-only)</h1>
+    <p class="muted">
+      Dev-only: your Azure key lives in this file. For production, use a token
+      server.
+    </p>
+    <p class="warn">
+      Processes 25 items, then sleeps 30s. Uses humanized SSML (style, pauses,
+      micro-variation, emphasis).
+    </p>
+
+    <div class="row">
+      <button id="start">Start Batch</button>
+      <span id="status">Idle</span>
+    </div>
+
+    <ol id="log"></ol>
+
+    <script>
+      // =========================
+      // CONSTANTS (edit these)
+      // =========================
+      const REGION = "eastus"; // Azure region
+      const KEY =
+        "30qsCQ6dnUJC26BYb2TwW0Z3AIUlwOhX4cq3WI4INml9Y8wUATrvJQQJ99BJACYeBjFXJ3w3AAAYACOGPry1"; // ⚠️ Dev only (don’t ship)
+      const VOICE = "es-PR-KarinaNeural"; // Fixed voice
+
+      // Humanization tuning
+      const STYLE = "cheerful"; // try: "customerservice", "cheerful", "empathetic"
+      const STYLE_DEGREE = 2; // 0.01–2 (higher = more expressive)
+      const BASE_RATE_PCT = -8; // gentle slower delivery
+      const BASE_PITCH_PCT = 1; // slight lift
+      const ENABLE_MICRO_VARIATION = true; // vary prosody per sentence slightly
+      const VAR_RATE_RANGE = 3; // ±% around BASE_RATE_PCT
+      const VAR_PITCH_RANGE = 2; // ±% around BASE_PITCH_PCT
+      const EMPHASIS = true; // add <emphasis> to highlighted words
+      const EMPHASIS_LEVEL = "reduced"; // "reduced" | "moderate" | "strong"
+      const EMPHASIS_MIN_LEN = 9; // long words get a hint of emphasis
+
+      // Output format
+      const FORMAT = "riff-24khz-16bit-mono-pcm"; // WAV; you can switch to MP3/OGG
+
+      // Your batch texts
+      const TEXTS = ["intenta de nuevo", "muy bien", "no", "Mi papá me ama"];
+
+      // Batch policy
+      const BATCH_SIZE = 25; // max items per burst
+      const BATCH_SLEEP_MS = 30_000; // 30 seconds between bursts
+
+      // =========================
+      // Helpers
+      // =========================
+      const $ = (id) => document.getElementById(id);
+      const logEl = $("log");
+      const statusEl = $("status");
+
+      function setStatus(t) {
+        statusEl.textContent = t;
+      }
+      function addLog(msg, isError = false) {
+        const li = document.createElement("li");
+        li.textContent = msg;
+        if (isError) li.style.color = "#b00020";
+        logEl.appendChild(li);
+        return li;
+      }
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      function escXml(s = "") {
+        return s.replace(
+          /[<>&'"]/g,
+          (c) =>
+            ({
+              "<": "&lt;",
+              ">": "&gt;",
+              "&": "&amp;",
+              "'": "&apos;",
+              '"': "&quot;",
+            }[c])
+        );
+      }
+
+      // --- Filename = text → "mi_mama_me_mima.wav"
+      function filenameFromText(text, ext, used = new Set()) {
+        let base = (text || "")
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "")
+          .replace(/_{2,}/g, "_");
+        if (!base) base = "clip";
+        base = base.slice(0, 80);
+        let name = base + ext;
+        let i = 2;
+        while (used.has(name)) {
+          name = `${base}_${i}${ext}`;
+          i++;
+        }
+        used.add(name);
+        return name;
+      }
+
+      function downloadBlob(blob, filename) {
+        const a = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function formatInfo(fmt) {
+        const map = {
+          "riff-24khz-16bit-mono-pcm": { mime: "audio/wav", ext: ".wav" },
+          "riff-16khz-16bit-mono-pcm": { mime: "audio/wav", ext: ".wav" },
+          "audio-24khz-48kbitrate-mono-mp3": {
+            mime: "audio/mpeg",
+            ext: ".mp3",
+          },
+          "audio-24khz-96kbitrate-mono-mp3": {
+            mime: "audio/mpeg",
+            ext: ".mp3",
+          },
+          "ogg-24khz-16bit-mono-opus": { mime: "audio/ogg", ext: ".ogg" },
+        };
+        return map[fmt] || map["riff-24khz-16bit-mono-pcm"];
+      }
+
+      // --- Humanization helpers ---
+      function splitSentences(text) {
+        // simple sentence split for ES; keeps punctuation
+        const parts = (text || "").match(/[^.!?¿¡]+[.!?…]?/g) || [];
+        return parts.map((s) => s.trim()).filter(Boolean);
+      }
+
+      function withSoftPauses(s) {
+        // add short comma pause, longer sentence pause
+        return s
+          .replace(/,\s+/g, ', <break time="90ms"/> ')
+          .replace(/;\s+/g, '; <break time="120ms"/> ')
+          .replace(/:\s+/g, ': <break time="120ms"/> ');
+      }
+
+      function emphasizeLongWords(s) {
+        if (!EMPHASIS) return s;
+        return s.replace(
+          /\b([\p{L}\p{N}]{9,})\b/gu,
+          (m) => `<emphasis level="${EMPHASIS_LEVEL}">${m}</emphasis>`
+        );
+      }
+
+      function jitter(valPct, rangePct) {
+        // returns valPct + random offset in [-rangePct, +rangePct]
+        if (!ENABLE_MICRO_VARIATION || !rangePct) return valPct;
+        const delta = (Math.random() * 2 - 1) * rangePct;
+        return Math.round((valPct + delta) * 100) / 100;
+      }
+
+      // --- Build SSML with style + sentence-level variation ---
+      function buildHumanSSML(text) {
+        const sentences = splitSentences(text);
+        const parts = sentences.map((sent, idx) => {
+          const core = emphasizeLongWords(withSoftPauses(escXml(sent)));
+          const r = jitter(BASE_RATE_PCT, VAR_RATE_RANGE);
+          const p = jitter(BASE_PITCH_PCT, VAR_PITCH_RANGE);
+          const tailPause =
+            idx < sentences.length - 1 ? `<break time="160ms"/>` : "";
+          return `<prosody rate="${r}%" pitch="${p}%">${core}</prosody>${tailPause}`;
+        });
+
+        return `
+<speak version="1.0"
+       xmlns="https://www.w3.org/2001/10/synthesis"
+       xmlns:mstts="https://www.w3.org/2001/mstts"
+       xml:lang="es-PR">
+  <voice name="${VOICE}">
+    <mstts:express-as style="${STYLE}" styledegree="${STYLE_DEGREE}">
+      ${parts.join("\n      ")}
+    </mstts:express-as>
+    <mstts:silence type="Tailing" value="100ms"/>
+  </voice>
+</speak>`.trim();
+      }
+
+      // --- Azure REST call (browser-only) ---
+      async function synthesizeBlob(ssml) {
+        const r = await fetch(
+          `https://${REGION}.tts.speech.microsoft.com/cognitiveservices/v1`,
+          {
+            method: "POST",
+            headers: {
+              "Ocp-Apim-Subscription-Key": KEY, // dev only
+              "Content-Type": "application/ssml+xml",
+              "X-Microsoft-OutputFormat": FORMAT,
+              "User-Agent": "batch-azure-tts-humanized",
+            },
+            body: ssml,
+          }
+        );
+        if (!r.ok)
+          throw new Error(
+            `HTTP ${r.status}: ${await r.text().catch(() => String(r.status))}`
+          );
+        const buf = await r.arrayBuffer();
+        return new Blob([buf], { type: formatInfo(FORMAT).mime });
+      }
+
+      // =========================
+      // Batch flow (25-per-batch + 30s sleep)
+      // =========================
+      async function runBatch() {
+        if (!KEY || KEY === "YOUR_AZURE_SPEECH_KEY") {
+          alert("Set your AZURE key first.");
+          return;
+        }
+        logEl.innerHTML = "";
+        const total = TEXTS.length;
+        const { ext } = formatInfo(FORMAT);
+        const used = new Set();
+
+        let done = 0;
+        for (let start = 0; start < total; start += BATCH_SIZE) {
+          const end = Math.min(start + BATCH_SIZE, total);
+          addLog(`Procesando elementos ${start + 1}–${end}…`);
+
+          for (let i = start; i < end; i++) {
+            const idx = i + 1;
+            const text = TEXTS[i];
+            const label = `#${idx}`;
+            try {
+              addLog(`${label} Sintetizando…`);
+              const ssml = buildHumanSSML(text);
+              const blob = await synthesizeBlob(ssml);
+              const name = filenameFromText(text, ext, used);
+              downloadBlob(blob, name);
+              done++;
+              setStatus(`Progreso: ${done}/${total}`);
+              addLog(`${label} Descargado: ${name}`);
+            } catch (e) {
+              console.error(e);
+              addLog(`${label} Error: ${e.message}`, true);
+            }
+          }
+
+          if (end < total) {
+            setStatus(`Lote completado (${end}/${total}). Pausa de 30s…`);
+            addLog(
+              `Durmiendo ${BATCH_SLEEP_MS / 1000}s antes del próximo lote…`
+            );
+            await sleep(BATCH_SLEEP_MS);
+          }
+        }
+
+        setStatus("Listo");
+        addLog("Todos los lotes completados.");
+      }
+
+      $("start").addEventListener("click", () => {
+        runBatch().catch((e) => {
+          console.error(e);
+          addLog(String(e), true);
+          setStatus("Error");
+        });
+      });
+    </script>
+  </body>
+</html>
