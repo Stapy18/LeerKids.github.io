@@ -19,6 +19,8 @@
     .choice-btn[disabled]{opacity:.55;cursor:not-allowed}
     .status-dot{width:.65rem;height:.65rem;border-radius:9999px;display:inline-block}
     .word-chip{min-height:48px}
+    .voice-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:.8rem;border:1px solid #cbd5e1;background:#f8fafc;padding:.55rem .8rem;font-size:.76rem;font-weight:800;color:#0f172a;transition:.18s ease}
+    .voice-btn:hover{background:#eef6ff;border-color:#93c5fd}
     .noun-token{cursor:pointer;user-select:none;-webkit-user-select:none}
     .noun-token.selected{box-shadow:0 0 0 3px rgba(14,165,233,.25)}
     .common-selected{background:#dbeafe!important;border-color:#60a5fa!important;color:#1d4ed8!important}
@@ -43,6 +45,9 @@
       </div>
       <div class="hidden text-sm text-slate-500 sm:block">Español — Capítulo 1</div>
       <div class="ml-auto flex items-center gap-2">
+        <button id="btnReadInstructions" class="voice-btn hidden sm:inline-flex">
+          🔊 Leer instrucciones
+        </button>
         <div class="hidden rounded-full bg-slate-100 px-3 py-1 text-sm font-bold sm:block">
           Progreso <span id="progressText">0/6</span>
         </div>
@@ -50,6 +55,10 @@
           Reiniciar
         </button>
       </div>
+    </div>
+    <div class="mx-auto max-w-5xl px-3 pb-2 sm:px-4">
+      <p id="voiceStatus" class="text-xs font-bold text-slate-500"></p>
+    </div>
     </div>
     <div class="h-2 bg-slate-200">
       <div id="topProgress" class="h-2 w-0 bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"></div>
@@ -67,7 +76,7 @@
 
       <!-- A -->
       <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="A">
-        <button class="section-toggle flex w-full items-center gap-3 px-4 py-4 text-left">
+        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 font-black text-blue-700">A</span>
           <div class="min-w-0 flex-1">
             <div class="font-black">Sustantivo común o propio</div>
@@ -75,9 +84,12 @@
           </div>
           <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
           <span class="chevron text-xl">▾</span>
-        </button>
+        </div>
         <div class="section-panel border-t border-slate-100 p-4">
-          <p class="mb-3 text-sm text-slate-600">Clasifica cada sustantivo entre <b>común</b> o <b>propio</b>.</p>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-slate-600">Clasifica cada sustantivo entre <b>común</b> o <b>propio</b>.</p>
+            <button type="button" class="section-instructions voice-btn" data-speak="Clasifica cada sustantivo entre común y propio.">🔊 Leer instrucciones</button>
+          </div>
           <div id="sectionA" class="grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="A">Revisar sección</button>
@@ -88,7 +100,7 @@
 
       <!-- B -->
       <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="B">
-        <button class="section-toggle flex w-full items-center gap-3 px-4 py-4 text-left">
+        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-100 font-black text-pink-700">B</span>
           <div class="min-w-0 flex-1">
             <div class="font-black">Género del sustantivo</div>
@@ -96,9 +108,12 @@
           </div>
           <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
           <span class="chevron text-xl">▸</span>
-        </button>
+        </div>
         <div class="section-panel border-t border-slate-100 p-4" hidden>
-          <p class="mb-3 text-sm text-slate-600">Identifica el sustantivo según su género.</p>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-slate-600">Identifica el sustantivo según su género.</p>
+            <button type="button" class="section-instructions voice-btn" data-speak="Identifica cada sustantivo según su género.">🔊 Leer instrucciones</button>
+          </div>
           <div id="sectionB" class="grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="B">Revisar sección</button>
@@ -109,7 +124,7 @@
 
       <!-- C -->
       <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="C">
-        <button class="section-toggle flex w-full items-center gap-3 px-4 py-4 text-left">
+        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 font-black text-violet-700">C</span>
           <div class="min-w-0 flex-1">
             <div class="font-black">Singular y plural</div>
@@ -117,8 +132,12 @@
           </div>
           <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
           <span class="chevron text-xl">▸</span>
-        </button>
+        </div>
         <div class="section-panel border-t border-slate-100 p-4" hidden>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-slate-600">Escribe el plural de cada palabra.</p>
+            <button type="button" class="section-instructions voice-btn" data-speak="Escribe el plural de cada palabra.">🔊 Leer instrucciones</button>
+          </div>
           <div id="sectionC" class="space-y-3"></div>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="C">Revisar sección</button>
@@ -129,7 +148,7 @@
 
       <!-- D -->
       <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="D">
-        <button class="section-toggle flex w-full items-center gap-3 px-4 py-4 text-left">
+        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 font-black text-amber-700">D</span>
           <div class="min-w-0 flex-1">
             <div class="font-black">Uso de mayúsculas</div>
@@ -137,8 +156,12 @@
           </div>
           <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
           <span class="chevron text-xl">▸</span>
-        </button>
+        </div>
         <div class="section-panel border-t border-slate-100 p-4" hidden>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-slate-600">Corrige las letras mayúsculas donde corresponda.</p>
+            <button type="button" class="section-instructions voice-btn" data-speak="Corrige las letras mayúsculas donde corresponda.">🔊 Leer instrucciones</button>
+          </div>
           <div id="sectionD" class="space-y-4"></div>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="D">Revisar sección</button>
@@ -149,7 +172,7 @@
 
       <!-- E -->
       <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="E">
-        <button class="section-toggle flex w-full items-center gap-3 px-4 py-4 text-left">
+        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 font-black text-emerald-700">E</span>
           <div class="min-w-0 flex-1">
             <div class="font-black">Alfabeto y diccionario</div>
@@ -157,8 +180,12 @@
           </div>
           <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
           <span class="chevron text-xl">▸</span>
-        </button>
+        </div>
         <div class="section-panel border-t border-slate-100 p-4" hidden>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-slate-600">Escoge la respuesta correcta.</p>
+            <button type="button" class="section-instructions voice-btn" data-speak="Escoge la respuesta correcta para cada pregunta.">🔊 Leer instrucciones</button>
+          </div>
           <div id="sectionE" class="space-y-5"></div>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="E">Revisar sección</button>
@@ -169,7 +196,7 @@
 
       <!-- F -->
       <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="F">
-        <button class="section-toggle flex w-full items-center gap-3 px-4 py-4 text-left">
+        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 font-black text-cyan-700">F</span>
           <div class="min-w-0 flex-1">
             <div class="font-black">Identifica el sustantivo</div>
@@ -177,8 +204,12 @@
           </div>
           <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
           <span class="chevron text-xl">▸</span>
-        </button>
+        </div>
         <div class="section-panel border-t border-slate-100 p-4" hidden>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-slate-600">Toca el sustantivo o los sustantivos de cada oración.</p>
+            <button type="button" class="section-instructions voice-btn" data-speak="Toca el sustantivo o los sustantivos de cada oración.">🔊 Leer instrucciones</button>
+          </div>
           <div id="sectionF" class="space-y-4"></div>
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="F">Revisar sección</button>
@@ -258,6 +289,48 @@
 
     const completed = new Set();
 
+    function getSpanishVoice(){
+      if (!("speechSynthesis" in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      return voices.find(v => /^es(-|_)/i.test(v.lang) || /spanish/i.test(v.name)) || null;
+    }
+
+    function updateVoiceStatus(){
+      const $status = $("#voiceStatus");
+      const spanishVoice = getSpanishVoice();
+      if (!("speechSynthesis" in window)) {
+        $status.text("Tu navegador no soporta lectura por voz.");
+        return;
+      }
+      if (spanishVoice) {
+        $status.text("Voz en español disponible: " + spanishVoice.name).removeClass("text-slate-500 text-amber-600").addClass("text-emerald-600");
+      } else {
+        $status.text("No hay una voz en español instalada. Instálala en Windows y recarga la página.").removeClass("text-slate-500 text-emerald-600").addClass("text-amber-600");
+      }
+    }
+
+    function speakText(text, options={}){
+      const phrase = String(text || "").trim();
+      if (!phrase || !("speechSynthesis" in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(phrase);
+        utterance.lang = "es-ES";
+        utterance.rate = options.rate ?? 0.95;
+        utterance.pitch = options.pitch ?? 1;
+
+        const spanishVoice = getSpanishVoice();
+        if (spanishVoice) {
+          utterance.voice = spanishVoice;
+          utterance.lang = spanishVoice.lang || "es-ES";
+        }
+
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("TTS no disponible:", e);
+      }
+    }
+
     function normalizeText(s){
       return String(s || "")
         .trim()
@@ -273,7 +346,10 @@
       DATA.A.forEach((x,i)=>{
         $root.append(`
           <div class="answer-card rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-a="${i}">
-            <div class="mb-2 text-center text-lg font-black">${x.text}</div>
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <div class="flex-1 text-center text-lg font-black">${x.text}</div>
+              <button type="button" class="read-word voice-btn" data-say="${x.text}">🔊</button>
+            </div>
             <div class="grid grid-cols-2 gap-2">
               <button class="a-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="comun">Común</button>
               <button class="a-choice rounded-xl border border-red-200 bg-red-50 px-2 py-2 text-sm font-black text-red-700" data-v="propio">Propio</button>
@@ -287,7 +363,10 @@
       DATA.B.forEach((x,i)=>{
         $root.append(`
           <div class="answer-card rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-b="${i}">
-            <div class="mb-2 text-center text-lg font-black">${x.text}</div>
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <div class="flex-1 text-center text-lg font-black">${x.text}</div>
+              <button type="button" class="read-word voice-btn" data-say="${x.text}">🔊</button>
+            </div>
             <div class="grid grid-cols-2 gap-2">
               <button class="b-choice rounded-xl border border-pink-200 bg-pink-50 px-2 py-2 text-sm font-black text-pink-700" data-v="femenino">Femenino</button>
               <button class="b-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="masculino">Masculino</button>
@@ -300,9 +379,10 @@
       const $root=$("#sectionC").empty();
       DATA.C.forEach((x,i)=>{
         $root.append(`
-          <label class="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[160px_1fr] sm:items-center">
+          <label class="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[160px_1fr_auto] sm:items-center">
             <span class="font-black">${x.word}</span>
             <input class="c-input rounded-xl border border-slate-300 bg-white px-3 py-3 font-bold outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" data-i="${i}" type="text" autocomplete="off" placeholder="Escribe el plural">
+            <button type="button" class="read-word voice-btn" data-say="${x.word}">🔊</button>
           </label>`);
       });
     }
@@ -312,7 +392,10 @@
       DATA.D.forEach((x,i)=>{
         $root.append(`
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <div class="mb-2 text-sm font-bold text-slate-700">${i+1}. ${x.sentence}</div>
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <div class="text-sm font-bold text-slate-700">${i+1}. ${x.sentence}</div>
+              <button type="button" class="read-word voice-btn" data-say="${x.sentence}">🔊</button>
+            </div>
             <input class="d-input w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-bold outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" data-i="${i}" type="text" autocomplete="off" placeholder="Escribe la oración corregida">
           </div>`);
       });
@@ -328,7 +411,10 @@
           </label>`).join("");
         $root.append(`
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3" data-e="${i}">
-            <div class="mb-3 font-black">${x.q}</div>
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <div class="font-black">${x.q}</div>
+              <button type="button" class="read-word voice-btn" data-say="${x.q}">🔊</button>
+            </div>
             <div class="grid gap-2 sm:grid-cols-3">${opts}</div>
           </div>`);
       });
@@ -460,6 +546,7 @@
     }
 
     $(function(){
+      updateVoiceStatus();
       renderA(); renderB(); renderC(); renderD(); renderE(); renderF(); updateProgress();
 
       // Acordeón: solo una sección abierta
@@ -485,6 +572,7 @@
         $card.attr("data-selected",v).removeClass("correct-ring wrong-ring");
         $card.find(".a-choice").removeClass("ring-2 ring-offset-1 ring-blue-400 ring-red-400");
         $(this).addClass(v==="comun" ? "ring-2 ring-offset-1 ring-blue-400" : "ring-2 ring-offset-1 ring-red-400");
+        speakText($(this).text().trim());
       });
 
       $(document).on("click",".b-choice",function(){
@@ -493,11 +581,25 @@
         $card.attr("data-selected",v).removeClass("correct-ring wrong-ring");
         $card.find(".b-choice").removeClass("ring-2 ring-offset-1 ring-pink-400 ring-blue-400");
         $(this).addClass(v==="femenino" ? "ring-2 ring-offset-1 ring-pink-400" : "ring-2 ring-offset-1 ring-blue-400");
+        speakText($(this).text().trim());
       });
 
       $(document).on("click",".noun-token",function(){
         $(this).toggleClass("selected bg-sky-100 border-sky-400 text-sky-800");
         $(this).closest("[data-f]").removeClass("correct-ring wrong-ring");
+        speakText($(this).text().trim());
+      });
+
+      $(document).on("click", ".read-word", function(){
+        speakText($(this).data("say") || "");
+      });
+
+      $(document).on("click", ".section-instructions", function(){
+        speakText($(this).data("speak") || "Instrucciones del ejercicio.");
+      });
+
+      $("#btnReadInstructions").on("click", function(){
+        speakText("Completa cada sección. Solo puede haber una abierta a la vez.");
       });
 
       $(".check-section").on("click",function(){
