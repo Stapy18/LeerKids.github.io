@@ -1010,7 +1010,9 @@
 
         $(document).on('click', '.uppercase-token', function () {
           const $token = $(this)
-          const baseWord = String($token.attr('data-word') || $token.text() || '').toLowerCase()
+          const baseWord = String(
+            $token.attr('data-word') || $token.text() || '',
+          ).toLowerCase()
           const willSelect = !$token.hasClass('selected')
 
           $token.toggleClass(
