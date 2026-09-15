@@ -47,6 +47,21 @@
       .word-chip {
         min-height: 48px;
       }
+      .case-marker {
+        display: inline-block;
+        min-width: 0.7ch;
+        text-decoration: underline;
+        text-decoration-thickness: 0.18rem;
+        text-underline-offset: 0.2rem;
+      }
+      .case-marker.lower {
+        color: #2563eb;
+        text-decoration-color: rgba(37, 99, 235, 0.7);
+      }
+      .case-marker.upper {
+        color: #b91c1c;
+        text-decoration-color: rgba(185, 28, 28, 0.7);
+      }
       .voice-btn {
         display: inline-flex;
         align-items: center;
@@ -197,6 +212,13 @@
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
               <p class="text-sm text-slate-600">
                 Clasifica cada sustantivo entre <b>común</b> o <b>propio</b>.
+                <span
+                  class="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-black text-slate-700"
+                >
+                  <span class="case-marker lower">a</span> minúscula
+                  <span class="mx-1">·</span>
+                  <span class="case-marker upper">A</span> mayúscula
+                </span>
               </p>
               <button
                 type="button"
@@ -506,11 +528,31 @@
           { text: 'mamá', answer: 'femenino' },
         ],
         C: [
-          { word: 'foto', answer: 'fotos' },
-          { word: 'lápiz', answer: 'lápices' },
-          { word: 'toalla', answer: 'toallas' },
-          { word: 'celular', answer: 'celulares' },
-          { word: 'ley', answer: 'leyes' },
+          {
+            word: 'foto',
+            options: ['fotos', 'fotas', 'fotoes'],
+            answer: 'fotos',
+          },
+          {
+            word: 'lápiz',
+            options: ['lápizes', 'lápices', 'lápizs'],
+            answer: 'lápices',
+          },
+          {
+            word: 'toalla',
+            options: ['toallas', 'toallass', 'toallaes'],
+            answer: 'toallas',
+          },
+          {
+            word: 'celular',
+            options: ['celulars', 'celulare', 'celulares'],
+            answer: 'celulares',
+          },
+          {
+            word: 'ley',
+            options: ['leys', 'leyes', 'leyes'],
+            answer: 'leyes',
+          },
         ],
         D: [
           {
@@ -644,10 +686,16 @@
       function renderA() {
         const $root = $('#sectionA').empty()
         DATA.A.forEach((x, i) => {
+          const firstLetter = String(x.text).charAt(0)
+          const rest = String(x.text).slice(1)
+          const letterClass = /[A-Z]/.test(firstLetter) ? 'upper' : 'lower'
+
           $root.append(`
           <div class="answer-card rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-a="${i}">
             <div class="mb-2 flex items-center justify-between gap-2">
-              <div class="flex-1 text-center text-lg font-black">${x.text}</div>
+              <div class="flex-1 text-center text-lg font-black">
+                <span class="case-marker ${letterClass}">${firstLetter}</span>${rest}
+              </div>
               <button type="button" class="read-word voice-btn" data-say="${x.text}">🔊</button>
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -678,12 +726,23 @@
       function renderC() {
         const $root = $('#sectionC').empty()
         DATA.C.forEach((x, i) => {
+          const options = x.options
+            .map(
+              (opt) => `
+          <button type="button" class="c-choice rounded-xl border border-violet-200 bg-white px-2 py-3 text-sm font-black text-violet-700 hover:bg-violet-50" data-option="${opt}" data-i="${i}">
+            ${opt}
+          </button>`,
+            )
+            .join('')
+
           $root.append(`
-          <label class="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[160px_1fr_auto] sm:items-center">
-            <span class="font-black">${x.word}</span>
-            <input class="c-input rounded-xl border border-slate-300 bg-white px-3 py-3 font-bold outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" data-i="${i}" type="text" autocomplete="off" placeholder="Escribe el plural">
-            <button type="button" class="read-word voice-btn" data-say="${x.word}">🔊</button>
-          </label>`)
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3" data-c="${i}">
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <span class="font-black">${x.word}</span>
+              <button type="button" class="read-word voice-btn" data-say="${x.word}">🔊</button>
+            </div>
+            <div class="grid grid-cols-3 gap-2">${options}</div>
+          </div>`)
         })
       }
 
@@ -846,22 +905,22 @@
         let ok = true,
           answered = true
         DATA.C.forEach((x, i) => {
-          const $input = $(`.c-input[data-i="${i}"]`)
-          const val = $input.val()
-          if (!String(val).trim()) answered = false
-          const good = normalizeText(val) === normalizeText(x.answer)
+          const v =
+            $(`[data-c="${i}"] .c-choice.selected`)
+              .first()
+              .attr('data-option') || ''
+          if (!v) answered = false
+          const good = v === x.answer
           if (!good) ok = false
-          $input
-            .toggleClass('border-emerald-500 ring-2 ring-emerald-100', good)
-            .toggleClass(
-              'border-red-500 ring-2 ring-red-100',
-              !!String(val).trim() && !good,
-            )
+          const $box = $(`[data-c="${i}"]`)
+          $box
+            .toggleClass('correct-ring', good && !!v)
+            .toggleClass('wrong-ring', !!v && !good)
         })
         markSection(
           'C',
           ok && answered,
-          answered ? undefined : 'Escribe todos los plurales.',
+          answered ? undefined : 'Selecciona una opción en cada plural.',
         )
       }
 
@@ -1002,6 +1061,20 @@
           speakText($(this).text().trim())
         })
 
+        $(document).on('click', '.c-choice', function () {
+          const $group = $(this).closest('[data-c]')
+          $group
+            .find('.c-choice')
+            .removeClass(
+              'selected bg-violet-100 border-violet-400 text-violet-800',
+            )
+          $(this).addClass(
+            'selected bg-violet-100 border-violet-400 text-violet-800',
+          )
+          $group.removeClass('correct-ring wrong-ring')
+          speakText($(this).text().trim())
+        })
+
         $(document).on('click', '.noun-token', function () {
           $(this).toggleClass('selected bg-sky-100 border-sky-400 text-sky-800')
           $(this).closest('[data-f]').removeClass('correct-ring wrong-ring')
@@ -1069,11 +1142,11 @@
             )
           $('input[type=radio]').prop('checked', false)
           $('[data-selected]').removeAttr('data-selected')
-          $('.answer-card,[data-e],[data-f],[data-d]').removeClass(
+          $('.answer-card,[data-c],[data-e],[data-f],[data-d]').removeClass(
             'correct-ring wrong-ring',
           )
-          $('.a-choice,.b-choice').removeClass(
-            'ring-2 ring-offset-1 ring-blue-400 ring-red-400 ring-pink-400',
+          $('.a-choice,.b-choice,.c-choice').removeClass(
+            'ring-2 ring-offset-1 ring-blue-400 ring-red-400 ring-pink-400 selected bg-violet-100 border-violet-400 text-violet-800',
           )
           $('.noun-token,.uppercase-token').removeClass(
             'selected bg-sky-100 border-sky-400 text-sky-800 bg-amber-100 border-amber-400 text-amber-800',
