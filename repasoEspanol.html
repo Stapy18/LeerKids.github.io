@@ -541,7 +541,7 @@
               'El género.',
               'Los distintos significados.',
             ],
-            answer: 'Los distintos significados.',
+            answer: 'La gramática.',
           },
         ],
         F: [
@@ -635,6 +635,12 @@
           .replace(/-/g, ' ')
       }
 
+      function capitalizeFirstLetter(text) {
+        const value = String(text || '')
+        if (!value) return ''
+        return value.charAt(0).toLocaleUpperCase('es') + value.slice(1)
+      }
+
       function renderA() {
         const $root = $('#sectionA').empty()
         DATA.A.forEach((x, i) => {
@@ -662,8 +668,8 @@
               <button type="button" class="read-word voice-btn" data-say="${x.text}">🔊</button>
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <button class="b-choice rounded-xl border border-pink-200 bg-pink-50 px-2 py-2 text-sm font-black text-pink-700" data-v="femenino">Femenino</button>
-              <button class="b-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="masculino">Masculino</button>
+              <button class="b-choice rounded-xl border border-pink-200 bg-pink-50 px-2 py-2 text-sm font-black text-pink-700" data-v="femenino">femenino</button>
+              <button class="b-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="masculino">masculino</button>
             </div>
           </div>`)
         })
@@ -686,12 +692,13 @@
         DATA.D.forEach((x, i) => {
           const tokens = x.sentence
             .split(/\s+/)
-            .map(
-              (w) => `
-          <button type="button" class="uppercase-token word-chip rounded-xl border border-slate-200 bg-white px-3 py-2 font-black hover:bg-amber-50" data-word="${w.replace(/"/g, '&quot;')}" data-d="${i}">
-            ${w}
-          </button>`,
-            )
+            .map((w) => {
+              const cleanWord = String(w).toLowerCase()
+              return `
+          <button type="button" class="uppercase-token word-chip rounded-xl border border-slate-200 bg-white px-3 py-2 font-black hover:bg-amber-50" data-word="${cleanWord.replace(/"/g, '&quot;')}" data-d="${i}">
+            ${cleanWord}
+          </button>`
+            })
             .join('')
 
           $root.append(`
@@ -1002,11 +1009,16 @@
         })
 
         $(document).on('click', '.uppercase-token', function () {
-          $(this).toggleClass(
+          const $token = $(this)
+          const baseWord = String($token.attr('data-word') || $token.text() || '').toLowerCase()
+          const willSelect = !$token.hasClass('selected')
+
+          $token.toggleClass(
             'selected bg-amber-100 border-amber-400 text-amber-800',
           )
-          $(this).closest('[data-d]').removeClass('correct-ring wrong-ring')
-          speakText($(this).text().trim())
+          $token.text(willSelect ? capitalizeFirstLetter(baseWord) : baseWord)
+          $token.closest('[data-d]').removeClass('correct-ring wrong-ring')
+          speakText($token.text().trim())
         })
 
         $(document).on('click', '.read-word', function () {
@@ -1064,6 +1076,9 @@
           $('.noun-token,.uppercase-token').removeClass(
             'selected bg-sky-100 border-sky-400 text-sky-800 bg-amber-100 border-amber-400 text-amber-800',
           )
+          $('.uppercase-token').each(function () {
+            $(this).text(String($(this).attr('data-word') || '').toLowerCase())
+          })
           $('.exam-section')
             .first()
             .find('.section-panel')
