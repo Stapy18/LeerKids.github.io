@@ -609,7 +609,7 @@
           window.speechSynthesis.cancel()
           const utterance = new SpeechSynthesisUtterance(phrase)
           utterance.lang = 'es-ES'
-          utterance.rate = options.rate ?? 0.95
+          utterance.rate = options.rate ?? 0.75
           utterance.pitch = options.pitch ?? 1
 
           const spanishVoice = getSpanishVoice()
