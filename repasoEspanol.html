@@ -1,367 +1,661 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LeerKids — Repaso Cap. 1</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LeerKids — Repaso Cap. 1</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-  <style>
-    html,body{font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-    body{min-height:100vh}
-    .answer-card{min-height:76px}
-    .section-panel[hidden]{display:none!important}
-    .choice-btn[disabled]{opacity:.55;cursor:not-allowed}
-    .status-dot{width:.65rem;height:.65rem;border-radius:9999px;display:inline-block}
-    .word-chip{min-height:48px}
-    .voice-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:.8rem;border:1px solid #cbd5e1;background:#f8fafc;padding:.55rem .8rem;font-size:.76rem;font-weight:800;color:#0f172a;transition:.18s ease}
-    .voice-btn:hover{background:#eef6ff;border-color:#93c5fd}
-    .noun-token{cursor:pointer;user-select:none;-webkit-user-select:none}
-    .noun-token.selected{box-shadow:0 0 0 3px rgba(14,165,233,.25)}
-    .common-selected{background:#dbeafe!important;border-color:#60a5fa!important;color:#1d4ed8!important}
-    .proper-selected{background:#fee2e2!important;border-color:#f87171!important;color:#b91c1c!important}
-    .fem-selected{background:#fce7f3!important;border-color:#f472b6!important;color:#be185d!important}
-    .masc-selected{background:#dbeafe!important;border-color:#60a5fa!important;color:#1d4ed8!important}
-    .correct-ring{box-shadow:0 0 0 3px rgba(34,197,94,.35)}
-    .wrong-ring{box-shadow:0 0 0 3px rgba(239,68,68,.35)}
-    @media (max-width:640px){
-      .answer-card{min-height:68px}
-      input[type="text"]{font-size:16px}
-    }
-  </style>
-</head>
-
-<body class="bg-slate-100 text-slate-900">
-  <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-    <div class="mx-auto flex max-w-5xl items-center gap-3 px-3 py-3 sm:px-4">
-      <div class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 font-black text-sky-900">
-        📘 LeerKids
-        <span class="rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[11px]">Repaso</span>
-      </div>
-      <div class="hidden text-sm text-slate-500 sm:block">Español — Capítulo 1</div>
-      <div class="ml-auto flex items-center gap-2">
-        <button id="btnReadInstructions" class="voice-btn hidden sm:inline-flex">
-          🔊 Leer instrucciones
-        </button>
-        <div class="hidden rounded-full bg-slate-100 px-3 py-1 text-sm font-bold sm:block">
-          Progreso <span id="progressText">0/6</span>
-        </div>
-        <button id="btnReset" class="rounded-xl border border-slate-200 px-3 py-2 font-bold hover:bg-slate-50">
-          Reiniciar
-        </button>
-      </div>
-    </div>
-    <div class="mx-auto max-w-5xl px-3 pb-2 sm:px-4">
-      <p id="voiceStatus" class="text-xs font-bold text-slate-500"></p>
-    </div>
-    </div>
-    <div class="h-2 bg-slate-200">
-      <div id="topProgress" class="h-2 w-0 bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"></div>
-    </div>
-  </header>
-
-  <main class="mx-auto max-w-5xl px-3 py-5 sm:px-4">
-    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p class="text-sm font-bold text-slate-500">11 de septiembre de 2026</p>
-      <h1 class="mt-1 text-2xl font-black sm:text-3xl">Repaso Cap. 1</h1>
-      <p class="mt-1 text-sm text-slate-600">Completa cada sección. Solo puede haber una abierta a la vez.</p>
-    </section>
-
-    <div id="sections" class="space-y-3">
-
-      <!-- A -->
-      <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="A">
-        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 font-black text-blue-700">A</span>
-          <div class="min-w-0 flex-1">
-            <div class="font-black">Sustantivo común o propio</div>
-            <div class="text-xs text-slate-500">Azul = común · rojo = propio</div>
-          </div>
-          <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
-          <span class="chevron text-xl">▾</span>
-        </div>
-        <div class="section-panel border-t border-slate-100 p-4">
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm text-slate-600">Clasifica cada sustantivo entre <b>común</b> o <b>propio</b>.</p>
-            <button type="button" class="section-instructions voice-btn" data-speak="Clasifica cada sustantivo entre común y propio.">🔊 Leer instrucciones</button>
-          </div>
-          <div id="sectionA" class="grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="A">Revisar sección</button>
-            <span class="section-msg text-sm font-bold"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- B -->
-      <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="B">
-        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-100 font-black text-pink-700">B</span>
-          <div class="min-w-0 flex-1">
-            <div class="font-black">Género del sustantivo</div>
-            <div class="text-xs text-slate-500">Rosado = femenino · azul = masculino</div>
-          </div>
-          <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
-          <span class="chevron text-xl">▸</span>
-        </div>
-        <div class="section-panel border-t border-slate-100 p-4" hidden>
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm text-slate-600">Identifica el sustantivo según su género.</p>
-            <button type="button" class="section-instructions voice-btn" data-speak="Identifica cada sustantivo según su género.">🔊 Leer instrucciones</button>
-          </div>
-          <div id="sectionB" class="grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="B">Revisar sección</button>
-            <span class="section-msg text-sm font-bold"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- C -->
-      <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="C">
-        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 font-black text-violet-700">C</span>
-          <div class="min-w-0 flex-1">
-            <div class="font-black">Singular y plural</div>
-            <div class="text-xs text-slate-500">Escribe el plural de cada palabra</div>
-          </div>
-          <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
-          <span class="chevron text-xl">▸</span>
-        </div>
-        <div class="section-panel border-t border-slate-100 p-4" hidden>
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm text-slate-600">Escribe el plural de cada palabra.</p>
-            <button type="button" class="section-instructions voice-btn" data-speak="Escribe el plural de cada palabra.">🔊 Leer instrucciones</button>
-          </div>
-          <div id="sectionC" class="space-y-3"></div>
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="C">Revisar sección</button>
-            <span class="section-msg text-sm font-bold"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- D -->
-      <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="D">
-        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 font-black text-amber-700">D</span>
-          <div class="min-w-0 flex-1">
-            <div class="font-black">Uso de mayúsculas</div>
-            <div class="text-xs text-slate-500">Corrige las letras mayúsculas donde corresponda</div>
-          </div>
-          <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
-          <span class="chevron text-xl">▸</span>
-        </div>
-        <div class="section-panel border-t border-slate-100 p-4" hidden>
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm text-slate-600">Corrige las letras mayúsculas donde corresponda.</p>
-            <button type="button" class="section-instructions voice-btn" data-speak="Corrige las letras mayúsculas donde corresponda.">🔊 Leer instrucciones</button>
-          </div>
-          <div id="sectionD" class="space-y-4"></div>
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="D">Revisar sección</button>
-            <span class="section-msg text-sm font-bold"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- E -->
-      <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="E">
-        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 font-black text-emerald-700">E</span>
-          <div class="min-w-0 flex-1">
-            <div class="font-black">Alfabeto y diccionario</div>
-            <div class="text-xs text-slate-500">Escoge la respuesta correcta</div>
-          </div>
-          <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
-          <span class="chevron text-xl">▸</span>
-        </div>
-        <div class="section-panel border-t border-slate-100 p-4" hidden>
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm text-slate-600">Escoge la respuesta correcta.</p>
-            <button type="button" class="section-instructions voice-btn" data-speak="Escoge la respuesta correcta para cada pregunta.">🔊 Leer instrucciones</button>
-          </div>
-          <div id="sectionE" class="space-y-5"></div>
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="E">Revisar sección</button>
-            <span class="section-msg text-sm font-bold"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- F -->
-      <section class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm" data-section="F">
-        <div class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left">
-          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 font-black text-cyan-700">F</span>
-          <div class="min-w-0 flex-1">
-            <div class="font-black">Identifica el sustantivo</div>
-            <div class="text-xs text-slate-500">Toca el sustantivo o los sustantivos de cada oración</div>
-          </div>
-          <span class="section-status text-sm font-bold text-slate-400">Pendiente</span>
-          <span class="chevron text-xl">▸</span>
-        </div>
-        <div class="section-panel border-t border-slate-100 p-4" hidden>
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm text-slate-600">Toca el sustantivo o los sustantivos de cada oración.</p>
-            <button type="button" class="section-instructions voice-btn" data-speak="Toca el sustantivo o los sustantivos de cada oración.">🔊 Leer instrucciones</button>
-          </div>
-          <div id="sectionF" class="space-y-4"></div>
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700" data-check="F">Revisar sección</button>
-            <span class="section-msg text-sm font-bold"></span>
-          </div>
-        </div>
-      </section>
-
-    </div>
-
-    <section id="finalCard" class="mt-5 hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm">
-      <div class="text-4xl">🎉</div>
-      <h2 class="mt-2 text-2xl font-black text-emerald-800">¡Repaso completado!</h2>
-      <p id="finalScore" class="mt-1 font-bold text-emerald-700"></p>
-    </section>
-  </main>
-
-  <script>
-    const DATA = {
-      A: [
-        {text:"estufa", answer:"comun"},
-        {text:"Mara", answer:"propio"},
-        {text:"Koda", answer:"propio"},
-        {text:"San Juan", answer:"propio"},
-        {text:"playa", answer:"comun"},
-        {text:"Armando", answer:"propio"},
-        {text:"cama", answer:"comun"},
-        {text:"oro", answer:"comun"}
-      ],
-      B: [
-        {text:"rosa", answer:"femenino"},
-        {text:"mesa", answer:"femenino"},
-        {text:"hijo", answer:"masculino"},
-        {text:"abuelo", answer:"masculino"},
-        {text:"libro", answer:"masculino"},
-        {text:"oro", answer:"masculino"},
-        {text:"hija", answer:"femenino"},
-        {text:"mamá", answer:"femenino"}
-      ],
-      C: [
-        {word:"foto", answer:"fotos"},
-        {word:"lápiz", answer:"lápices"},
-        {word:"toalla", answer:"toallas"},
-        {word:"celular", answer:"celulares"},
-        {word:"ley", answer:"leyes"}
-      ],
-      D: [
-        {sentence:"mi abuela zenaida vive en utuado.", answer:"Mi abuela Zenaida vive en Utuado."},
-        {sentence:"tato y papo son mis tíos.", answer:"Tato y Papo son mis tíos."},
-        {sentence:"mi primo se llama gregorio.", answer:"Mi primo se llama Gregorio."}
-      ],
-      E: [
-        {
-          q:"1. ¿Cuántas letras tiene el alfabeto español?",
-          options:["28","27","26"],
-          answer:"27"
-        },
-        {
-          q:"2. ¿Cómo están organizadas las palabras en el diccionario?",
-          options:["En números.","En orden alfabético.","En desorden."],
-          answer:"En orden alfabético."
-        },
-        {
-          q:"4. ¿Qué indican los números que aparecen luego de la palabra en el diccionario?",
-          options:["La gramática.","El género.","Los distintos significados."],
-          answer:"Los distintos significados."
+    <style>
+      html,
+      body {
+        font-family:
+          'Nunito',
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+      }
+      body {
+        min-height: 100vh;
+      }
+      .answer-card {
+        min-height: 76px;
+      }
+      .section-panel[hidden] {
+        display: none !important;
+      }
+      .choice-btn[disabled] {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .status-dot {
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 9999px;
+        display: inline-block;
+      }
+      .word-chip {
+        min-height: 48px;
+      }
+      .voice-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        border-radius: 0.8rem;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        padding: 0.55rem 0.8rem;
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #0f172a;
+        transition: 0.18s ease;
+      }
+      .voice-btn:hover {
+        background: #eef6ff;
+        border-color: #93c5fd;
+      }
+      .noun-token {
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .noun-token.selected {
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+      }
+      .common-selected {
+        background: #dbeafe !important;
+        border-color: #60a5fa !important;
+        color: #1d4ed8 !important;
+      }
+      .proper-selected {
+        background: #fee2e2 !important;
+        border-color: #f87171 !important;
+        color: #b91c1c !important;
+      }
+      .fem-selected {
+        background: #fce7f3 !important;
+        border-color: #f472b6 !important;
+        color: #be185d !important;
+      }
+      .masc-selected {
+        background: #dbeafe !important;
+        border-color: #60a5fa !important;
+        color: #1d4ed8 !important;
+      }
+      .correct-ring {
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+      }
+      .wrong-ring {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+      }
+      @media (max-width: 640px) {
+        .answer-card {
+          min-height: 68px;
         }
-      ],
-      F: [
-        {sentence:["Mara","es","mi","prima."], answers:["Mara","prima."]},
-        {sentence:["Sofia","y","Fernando","son","primos."], answers:["Sofia","Fernando","primos."]},
-        {sentence:["Carmen","es","una","buena","amiga."], answers:["Carmen","amiga."]},
-        {sentence:["Hoy","visitare","San","Juan."], answers:["San","Juan."]},
-        {sentence:["La","playa","Flamenco","es","hermosa."], answers:["playa","Flamenco"]}
-      ]
-    };
-
-    const completed = new Set();
-
-    function getSpanishVoice(){
-      if (!("speechSynthesis" in window)) return null;
-      const voices = window.speechSynthesis.getVoices();
-      return voices.find(v => /^es(-|_)/i.test(v.lang) || /spanish/i.test(v.name)) || null;
-    }
-
-    function updateVoiceStatus(){
-      const $status = $("#voiceStatus");
-      const spanishVoice = getSpanishVoice();
-      if (!("speechSynthesis" in window)) {
-        $status.text("Tu navegador no soporta lectura por voz.");
-        return;
+        input[type='text'] {
+          font-size: 16px;
+        }
       }
-      if (spanishVoice) {
-        $status.text("Voz en español disponible: " + spanishVoice.name).removeClass("text-slate-500 text-amber-600").addClass("text-emerald-600");
-      } else {
-        $status.text("No hay una voz en español instalada. Instálala en Windows y recarga la página.").removeClass("text-slate-500 text-emerald-600").addClass("text-amber-600");
+    </style>
+  </head>
+
+  <body class="bg-slate-100 text-slate-900">
+    <header
+      class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur"
+    >
+      <div class="mx-auto flex max-w-5xl items-center gap-3 px-3 py-3 sm:px-4">
+        <div
+          class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 font-black text-sky-900"
+        >
+          📘 LeerKids
+          <span
+            class="rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[11px]"
+            >Repaso</span
+          >
+        </div>
+        <div class="hidden text-sm text-slate-500 sm:block">
+          Español — Capítulo 1
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <button
+            id="btnReadInstructions"
+            class="voice-btn hidden sm:inline-flex"
+          >
+            🔊 Leer instrucciones
+          </button>
+          <div
+            class="hidden rounded-full bg-slate-100 px-3 py-1 text-sm font-bold sm:block"
+          >
+            Progreso <span id="progressText">0/6</span>
+          </div>
+          <button
+            id="btnReset"
+            class="rounded-xl border border-slate-200 px-3 py-2 font-bold hover:bg-slate-50"
+          >
+            Reiniciar
+          </button>
+        </div>
+      </div>
+      <div class="mx-auto max-w-5xl px-3 pb-2 sm:px-4">
+        <p id="voiceStatus" class="text-xs font-bold text-slate-500"></p>
+      </div>
+      <div class="h-2 bg-slate-200">
+        <div
+          id="topProgress"
+          class="h-2 w-0 bg-gradient-to-r from-emerald-500 to-sky-500 transition-all"
+        ></div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-3 py-5 sm:px-4">
+      <section
+        class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+      >
+        <p class="text-sm font-bold text-slate-500">11 de septiembre de 2026</p>
+        <h1 class="mt-1 text-2xl font-black sm:text-3xl">Repaso Cap. 1</h1>
+        <p class="mt-1 text-sm text-slate-600">
+          Completa cada sección. Solo puede haber una abierta a la vez.
+        </p>
+      </section>
+
+      <div id="sections" class="space-y-3">
+        <!-- A -->
+        <section
+          class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm"
+          data-section="A"
+        >
+          <div
+            class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 font-black text-blue-700"
+              >A</span
+            >
+            <div class="min-w-0 flex-1">
+              <div class="font-black">Sustantivo común o propio</div>
+              <div class="text-xs text-slate-500">
+                Azul = común · rojo = propio
+              </div>
+            </div>
+            <span class="section-status text-sm font-bold text-slate-400"
+              >Pendiente</span
+            >
+            <span class="chevron text-xl">▾</span>
+          </div>
+          <div class="section-panel border-t border-slate-100 p-4">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-sm text-slate-600">
+                Clasifica cada sustantivo entre <b>común</b> o <b>propio</b>.
+              </p>
+              <button
+                type="button"
+                class="section-instructions voice-btn"
+                data-speak="Clasifica cada sustantivo entre común y propio."
+              >
+                🔊 Leer instrucciones
+              </button>
+            </div>
+            <div
+              id="sectionA"
+              class="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            ></div>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700"
+                data-check="A"
+              >
+                Revisar sección
+              </button>
+              <span class="section-msg text-sm font-bold"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- B -->
+        <section
+          class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm"
+          data-section="B"
+        >
+          <div
+            class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-100 font-black text-pink-700"
+              >B</span
+            >
+            <div class="min-w-0 flex-1">
+              <div class="font-black">Género del sustantivo</div>
+              <div class="text-xs text-slate-500">
+                Rosado = femenino · azul = masculino
+              </div>
+            </div>
+            <span class="section-status text-sm font-bold text-slate-400"
+              >Pendiente</span
+            >
+            <span class="chevron text-xl">▸</span>
+          </div>
+          <div class="section-panel border-t border-slate-100 p-4" hidden>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-sm text-slate-600">
+                Identifica el sustantivo según su género.
+              </p>
+              <button
+                type="button"
+                class="section-instructions voice-btn"
+                data-speak="Identifica cada sustantivo según su género."
+              >
+                🔊 Leer instrucciones
+              </button>
+            </div>
+            <div
+              id="sectionB"
+              class="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            ></div>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700"
+                data-check="B"
+              >
+                Revisar sección
+              </button>
+              <span class="section-msg text-sm font-bold"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- C -->
+        <section
+          class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm"
+          data-section="C"
+        >
+          <div
+            class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 font-black text-violet-700"
+              >C</span
+            >
+            <div class="min-w-0 flex-1">
+              <div class="font-black">Singular y plural</div>
+              <div class="text-xs text-slate-500">
+                Escribe el plural de cada palabra
+              </div>
+            </div>
+            <span class="section-status text-sm font-bold text-slate-400"
+              >Pendiente</span
+            >
+            <span class="chevron text-xl">▸</span>
+          </div>
+          <div class="section-panel border-t border-slate-100 p-4" hidden>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-sm text-slate-600">
+                Escribe el plural de cada palabra.
+              </p>
+              <button
+                type="button"
+                class="section-instructions voice-btn"
+                data-speak="Escribe el plural de cada palabra."
+              >
+                🔊 Leer instrucciones
+              </button>
+            </div>
+            <div id="sectionC" class="space-y-3"></div>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700"
+                data-check="C"
+              >
+                Revisar sección
+              </button>
+              <span class="section-msg text-sm font-bold"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- D -->
+        <section
+          class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm"
+          data-section="D"
+        >
+          <div
+            class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 font-black text-amber-700"
+              >D</span
+            >
+            <div class="min-w-0 flex-1">
+              <div class="font-black">Uso de mayúsculas</div>
+              <div class="text-xs text-slate-500">
+                Selecciona las palabras que llevan mayúscula
+              </div>
+            </div>
+            <span class="section-status text-sm font-bold text-slate-400"
+              >Pendiente</span
+            >
+            <span class="chevron text-xl">▸</span>
+          </div>
+          <div class="section-panel border-t border-slate-100 p-4" hidden>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-sm text-slate-600">
+                Selecciona las palabras que deben llevar mayúscula.
+              </p>
+              <button
+                type="button"
+                class="section-instructions voice-btn"
+                data-speak="Selecciona las palabras que deben llevar mayúscula."
+              >
+                🔊 Leer instrucciones
+              </button>
+            </div>
+            <div id="sectionD" class="space-y-4"></div>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700"
+                data-check="D"
+              >
+                Revisar sección
+              </button>
+              <span class="section-msg text-sm font-bold"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- E -->
+        <section
+          class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm"
+          data-section="E"
+        >
+          <div
+            class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 font-black text-emerald-700"
+              >E</span
+            >
+            <div class="min-w-0 flex-1">
+              <div class="font-black">Alfabeto y diccionario</div>
+              <div class="text-xs text-slate-500">
+                Escoge la respuesta correcta
+              </div>
+            </div>
+            <span class="section-status text-sm font-bold text-slate-400"
+              >Pendiente</span
+            >
+            <span class="chevron text-xl">▸</span>
+          </div>
+          <div class="section-panel border-t border-slate-100 p-4" hidden>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-sm text-slate-600">
+                Escoge la respuesta correcta.
+              </p>
+              <button
+                type="button"
+                class="section-instructions voice-btn"
+                data-speak="Escoge la respuesta correcta para cada pregunta."
+              >
+                🔊 Leer instrucciones
+              </button>
+            </div>
+            <div id="sectionE" class="space-y-5"></div>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700"
+                data-check="E"
+              >
+                Revisar sección
+              </button>
+              <span class="section-msg text-sm font-bold"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- F -->
+        <section
+          class="exam-section rounded-2xl border border-slate-200 bg-white shadow-sm"
+          data-section="F"
+        >
+          <div
+            class="section-toggle flex w-full cursor-pointer items-center gap-3 px-4 py-4 text-left"
+          >
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 font-black text-cyan-700"
+              >F</span
+            >
+            <div class="min-w-0 flex-1">
+              <div class="font-black">Identifica el sustantivo</div>
+              <div class="text-xs text-slate-500">
+                Toca el sustantivo o los sustantivos de cada oración
+              </div>
+            </div>
+            <span class="section-status text-sm font-bold text-slate-400"
+              >Pendiente</span
+            >
+            <span class="chevron text-xl">▸</span>
+          </div>
+          <div class="section-panel border-t border-slate-100 p-4" hidden>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-sm text-slate-600">
+                Toca el sustantivo o los sustantivos de cada oración.
+              </p>
+              <button
+                type="button"
+                class="section-instructions voice-btn"
+                data-speak="Toca el sustantivo o los sustantivos de cada oración."
+              >
+                🔊 Leer instrucciones
+              </button>
+            </div>
+            <div id="sectionF" class="space-y-4"></div>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                class="check-section rounded-xl bg-emerald-600 px-4 py-2 font-black text-white hover:bg-emerald-700"
+                data-check="F"
+              >
+                Revisar sección
+              </button>
+              <span class="section-msg text-sm font-bold"></span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section
+        id="finalCard"
+        class="mt-5 hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm"
+      >
+        <div class="text-4xl">🎉</div>
+        <h2 class="mt-2 text-2xl font-black text-emerald-800">
+          ¡Repaso completado!
+        </h2>
+        <p id="finalScore" class="mt-1 font-bold text-emerald-700"></p>
+      </section>
+    </main>
+
+    <script>
+      const DATA = {
+        A: [
+          { text: 'estufa', answer: 'comun' },
+          { text: 'Mara', answer: 'propio' },
+          { text: 'Koda', answer: 'propio' },
+          { text: 'San Juan', answer: 'propio' },
+          { text: 'playa', answer: 'comun' },
+          { text: 'Armando', answer: 'propio' },
+          { text: 'cama', answer: 'comun' },
+          { text: 'oro', answer: 'comun' },
+        ],
+        B: [
+          { text: 'rosa', answer: 'femenino' },
+          { text: 'mesa', answer: 'femenino' },
+          { text: 'hijo', answer: 'masculino' },
+          { text: 'abuelo', answer: 'masculino' },
+          { text: 'libro', answer: 'masculino' },
+          { text: 'oro', answer: 'masculino' },
+          { text: 'hija', answer: 'femenino' },
+          { text: 'mamá', answer: 'femenino' },
+        ],
+        C: [
+          { word: 'foto', answer: 'fotos' },
+          { word: 'lápiz', answer: 'lápices' },
+          { word: 'toalla', answer: 'toallas' },
+          { word: 'celular', answer: 'celulares' },
+          { word: 'ley', answer: 'leyes' },
+        ],
+        D: [
+          {
+            sentence: 'mi abuela zenaida vive en utuado.',
+            answers: ['Mi', 'Zenaida', 'Utuado'],
+          },
+          { sentence: 'tato y papo son mis tíos.', answers: ['Tato', 'Papo'] },
+          {
+            sentence: 'mi primo se llama gregorio.',
+            answers: ['Mi', 'Gregorio'],
+          },
+        ],
+        E: [
+          {
+            q: '1. ¿Cuántas letras tiene el alfabeto español?',
+            options: ['28', '27', '26'],
+            answer: '27',
+          },
+          {
+            q: '2. ¿Cómo están organizadas las palabras en el diccionario?',
+            options: ['En números.', 'En orden alfabético.', 'En desorden.'],
+            answer: 'En orden alfabético.',
+          },
+          {
+            q: '4. ¿Qué indican los números que aparecen luego de la palabra en el diccionario?',
+            options: [
+              'La gramática.',
+              'El género.',
+              'Los distintos significados.',
+            ],
+            answer: 'Los distintos significados.',
+          },
+        ],
+        F: [
+          {
+            sentence: ['Mara', 'es', 'mi', 'prima.'],
+            answers: ['Mara', 'prima'],
+          },
+          {
+            sentence: ['Sofia', 'y', 'Fernando', 'son', 'primos.'],
+            answers: ['Sofia', 'Fernando', 'primos'],
+          },
+          {
+            sentence: ['Carmen', 'es', 'una', 'buena', 'amiga.'],
+            answers: ['Carmen', 'amiga'],
+          },
+          {
+            sentence: ['Hoy', 'visitare', 'San', 'Juan.'],
+            answers: ['San', 'Juan'],
+          },
+          {
+            sentence: ['La', 'playa', 'Flamenco', 'es', 'hermosa.'],
+            answers: ['playa', 'Flamenco'],
+          },
+        ],
       }
-    }
 
-    function speakText(text, options={}){
-      const phrase = String(text || "").trim();
-      if (!phrase || !("speechSynthesis" in window)) return;
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(phrase);
-        utterance.lang = "es-ES";
-        utterance.rate = options.rate ?? 0.95;
-        utterance.pitch = options.pitch ?? 1;
+      const completed = new Set()
 
-        const spanishVoice = getSpanishVoice();
+      function getSpanishVoice() {
+        if (!('speechSynthesis' in window)) return null
+        const voices = window.speechSynthesis.getVoices()
+        return (
+          voices.find(
+            (v) => /^es(-|_)/i.test(v.lang) || /spanish/i.test(v.name),
+          ) || null
+        )
+      }
+
+      function updateVoiceStatus() {
+        const $status = $('#voiceStatus')
+        const spanishVoice = getSpanishVoice()
+        if (!('speechSynthesis' in window)) {
+          $status.text('Tu navegador no soporta lectura por voz.')
+          return
+        }
         if (spanishVoice) {
-          utterance.voice = spanishVoice;
-          utterance.lang = spanishVoice.lang || "es-ES";
+          $status
+            .text('Voz en español disponible: ' + spanishVoice.name)
+            .removeClass('text-slate-500 text-amber-600')
+            .addClass('text-emerald-600')
+        } else {
+          $status
+            .text(
+              'No hay una voz en español instalada. Instálala en Windows y recarga la página.',
+            )
+            .removeClass('text-slate-500 text-emerald-600')
+            .addClass('text-amber-600')
         }
-
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {
-        console.warn("TTS no disponible:", e);
       }
-    }
 
-    function normalizeText(s){
-      return String(s || "")
-        .trim()
-        .replace(/\s+/g," ")
-        .toLocaleLowerCase("es")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g,"")
-        .replace(/[“”"]/g,"");
-    }
+      function speakText(text, options = {}) {
+        const phrase = String(text || '').trim()
+        if (!phrase || !('speechSynthesis' in window)) return
+        try {
+          window.speechSynthesis.cancel()
+          const utterance = new SpeechSynthesisUtterance(phrase)
+          utterance.lang = 'es-ES'
+          utterance.rate = options.rate ?? 0.95
+          utterance.pitch = options.pitch ?? 1
 
-    function renderA(){
-      const $root=$("#sectionA").empty();
-      DATA.A.forEach((x,i)=>{
-        $root.append(`
+          const spanishVoice = getSpanishVoice()
+          if (spanishVoice) {
+            utterance.voice = spanishVoice
+            utterance.lang = spanishVoice.lang || 'es-ES'
+          }
+
+          window.speechSynthesis.speak(utterance)
+        } catch (e) {
+          console.warn('TTS no disponible:', e)
+        }
+      }
+
+      function normalizeText(s) {
+        return String(s || '')
+          .trim()
+          .replace(/\s+/g, ' ')
+          .toLocaleLowerCase('es')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[“”".,;:!?¡¿()\[\]{}<>]+/g, '')
+          .replace(/-/g, ' ')
+      }
+
+      function renderA() {
+        const $root = $('#sectionA').empty()
+        DATA.A.forEach((x, i) => {
+          $root.append(`
           <div class="answer-card rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-a="${i}">
             <div class="mb-2 flex items-center justify-between gap-2">
               <div class="flex-1 text-center text-lg font-black">${x.text}</div>
               <button type="button" class="read-word voice-btn" data-say="${x.text}">🔊</button>
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <button class="a-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="comun">Común</button>
+              <button class="a-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="comun">común</button>
               <button class="a-choice rounded-xl border border-red-200 bg-red-50 px-2 py-2 text-sm font-black text-red-700" data-v="propio">Propio</button>
             </div>
-          </div>`);
-      });
-    }
+          </div>`)
+        })
+      }
 
-    function renderB(){
-      const $root=$("#sectionB").empty();
-      DATA.B.forEach((x,i)=>{
-        $root.append(`
+      function renderB() {
+        const $root = $('#sectionB').empty()
+        DATA.B.forEach((x, i) => {
+          $root.append(`
           <div class="answer-card rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-b="${i}">
             <div class="mb-2 flex items-center justify-between gap-2">
               <div class="flex-1 text-center text-lg font-black">${x.text}</div>
@@ -371,261 +665,414 @@
               <button class="b-choice rounded-xl border border-pink-200 bg-pink-50 px-2 py-2 text-sm font-black text-pink-700" data-v="femenino">Femenino</button>
               <button class="b-choice rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-sm font-black text-blue-700" data-v="masculino">Masculino</button>
             </div>
-          </div>`);
-      });
-    }
+          </div>`)
+        })
+      }
 
-    function renderC(){
-      const $root=$("#sectionC").empty();
-      DATA.C.forEach((x,i)=>{
-        $root.append(`
+      function renderC() {
+        const $root = $('#sectionC').empty()
+        DATA.C.forEach((x, i) => {
+          $root.append(`
           <label class="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[160px_1fr_auto] sm:items-center">
             <span class="font-black">${x.word}</span>
             <input class="c-input rounded-xl border border-slate-300 bg-white px-3 py-3 font-bold outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" data-i="${i}" type="text" autocomplete="off" placeholder="Escribe el plural">
             <button type="button" class="read-word voice-btn" data-say="${x.word}">🔊</button>
-          </label>`);
-      });
-    }
+          </label>`)
+        })
+      }
 
-    function renderD(){
-      const $root=$("#sectionD").empty();
-      DATA.D.forEach((x,i)=>{
-        $root.append(`
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+      function renderD() {
+        const $root = $('#sectionD').empty()
+        DATA.D.forEach((x, i) => {
+          const tokens = x.sentence
+            .split(/\s+/)
+            .map(
+              (w) => `
+          <button type="button" class="uppercase-token word-chip rounded-xl border border-slate-200 bg-white px-3 py-2 font-black hover:bg-amber-50" data-word="${w.replace(/"/g, '&quot;')}" data-d="${i}">
+            ${w}
+          </button>`,
+            )
+            .join('')
+
+          $root.append(`
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3" data-d="${i}">
             <div class="mb-2 flex items-center justify-between gap-2">
-              <div class="text-sm font-bold text-slate-700">${i+1}. ${x.sentence}</div>
+              <div class="text-sm font-bold text-slate-700">${i + 1}. ${x.sentence}</div>
               <button type="button" class="read-word voice-btn" data-say="${x.sentence}">🔊</button>
             </div>
-            <input class="d-input w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-bold outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" data-i="${i}" type="text" autocomplete="off" placeholder="Escribe la oración corregida">
-          </div>`);
-      });
-    }
+            <div class="flex flex-wrap gap-2">${tokens}</div>
+          </div>`)
+        })
+      }
 
-    function renderE(){
-      const $root=$("#sectionE").empty();
-      DATA.E.forEach((x,i)=>{
-        const opts=x.options.map((o,j)=>`
+      function renderE() {
+        const $root = $('#sectionE').empty()
+        DATA.E.forEach((x, i) => {
+          const opts = x.options
+            .map(
+              (o, j) => `
           <label class="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="e_${i}" value="${o.replace(/"/g,'&quot;')}" class="e-radio h-5 w-5 accent-emerald-600">
+            <input type="radio" name="e_${i}" value="${o.replace(/"/g, '&quot;')}" class="e-radio h-5 w-5 accent-emerald-600">
             <span class="font-bold">${o}</span>
-          </label>`).join("");
-        $root.append(`
+          </label>`,
+            )
+            .join('')
+          $root.append(`
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3" data-e="${i}">
             <div class="mb-3 flex items-center justify-between gap-2">
               <div class="font-black">${x.q}</div>
               <button type="button" class="read-word voice-btn" data-say="${x.q}">🔊</button>
             </div>
             <div class="grid gap-2 sm:grid-cols-3">${opts}</div>
-          </div>`);
-      });
-    }
+          </div>`)
+        })
+      }
 
-    function renderF(){
-      const $root=$("#sectionF").empty();
-      DATA.F.forEach((x,i)=>{
-        const tokens=x.sentence.map((w,j)=>`
-          <button type="button" class="noun-token word-chip rounded-xl border border-slate-200 bg-white px-3 py-2 font-black hover:bg-sky-50" data-word="${w.replace(/"/g,'&quot;')}" data-i="${i}">
+      function renderF() {
+        const $root = $('#sectionF').empty()
+        DATA.F.forEach((x, i) => {
+          const sentenceText = x.sentence.join(' ')
+          const tokens = x.sentence
+            .map(
+              (w, j) => `
+          <button type="button" class="noun-token word-chip rounded-xl border border-slate-200 bg-white px-3 py-2 font-black hover:bg-sky-50" data-word="${w.replace(/"/g, '&quot;')}" data-i="${i}">
             ${w}
-          </button>`).join("");
-        $root.append(`
+          </button>`,
+            )
+            .join('')
+          $root.append(`
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3" data-f="${i}">
-            <div class="mb-2 text-sm font-bold text-slate-500">${i+1}.</div>
-            <div class="flex flex-wrap gap-2">${tokens}</div>
-          </div>`);
-      });
-    }
-
-    function updateProgress(){
-      const n=completed.size;
-      $("#progressText").text(`${n}/6`);
-      $("#topProgress").css("width",`${(n/6)*100}%`);
-      if(n===6){
-        $("#finalScore").text("Completaste correctamente las 6 secciones.");
-        $("#finalCard").removeClass("hidden");
-        window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
-      }else{
-        $("#finalCard").addClass("hidden");
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <div class="text-sm font-bold text-slate-500">${i + 1}. ${sentenceText}</div>
+              <button type="button" class="read-word voice-btn" data-say="${sentenceText}">🔊</button>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-2">${tokens}</div>
+          </div>`)
+        })
       }
-    }
 
-    function markSection(letter,ok,msg){
-      const $sec=$(`.exam-section[data-section="${letter}"]`);
-      const $status=$sec.find(".section-status");
-      const $msg=$sec.find(".section-msg");
-      if(ok){
-        completed.add(letter);
-        $status.text("✅ Completado").removeClass("text-slate-400 text-red-600").addClass("text-emerald-600");
-        $msg.text(msg || "¡Muy bien!").removeClass("text-red-600").addClass("text-emerald-600");
-      }else{
-        completed.delete(letter);
-        $status.text("Revisa").removeClass("text-slate-400 text-emerald-600").addClass("text-red-600");
-        $msg.text(msg || "Hay respuestas por corregir.").removeClass("text-emerald-600").addClass("text-red-600");
-      }
-      updateProgress();
-    }
-
-    function checkA(){
-      let ok=true, answered=true;
-      DATA.A.forEach((x,i)=>{
-        const $card=$(`[data-a="${i}"]`);
-        const v=$card.attr("data-selected")||"";
-        if(!v) answered=false;
-        const good=v===x.answer;
-        if(!good) ok=false;
-        $card.toggleClass("correct-ring",good && !!v).toggleClass("wrong-ring",!!v && !good);
-      });
-      markSection("A",ok && answered, answered ? undefined : "Completa todas las palabras.");
-    }
-
-    function checkB(){
-      let ok=true, answered=true;
-      DATA.B.forEach((x,i)=>{
-        const $card=$(`[data-b="${i}"]`);
-        const v=$card.attr("data-selected")||"";
-        if(!v) answered=false;
-        const good=v===x.answer;
-        if(!good) ok=false;
-        $card.toggleClass("correct-ring",good && !!v).toggleClass("wrong-ring",!!v && !good);
-      });
-      markSection("B",ok && answered, answered ? undefined : "Completa todas las palabras.");
-    }
-
-    function checkC(){
-      let ok=true, answered=true;
-      DATA.C.forEach((x,i)=>{
-        const $input=$(`.c-input[data-i="${i}"]`);
-        const val=$input.val();
-        if(!String(val).trim()) answered=false;
-        const good=normalizeText(val)===normalizeText(x.answer);
-        if(!good) ok=false;
-        $input.toggleClass("border-emerald-500 ring-2 ring-emerald-100",good)
-              .toggleClass("border-red-500 ring-2 ring-red-100",!!String(val).trim() && !good);
-      });
-      markSection("C",ok && answered, answered ? undefined : "Escribe todos los plurales.");
-    }
-
-    function checkD(){
-      let ok=true, answered=true;
-      DATA.D.forEach((x,i)=>{
-        const $input=$(`.d-input[data-i="${i}"]`);
-        const val=$input.val();
-        if(!String(val).trim()) answered=false;
-        const good=normalizeText(val)===normalizeText(x.answer);
-        if(!good) ok=false;
-        $input.toggleClass("border-emerald-500 ring-2 ring-emerald-100",good)
-              .toggleClass("border-red-500 ring-2 ring-red-100",!!String(val).trim() && !good);
-      });
-      markSection("D",ok && answered, answered ? undefined : "Corrige las tres oraciones.");
-    }
-
-    function checkE(){
-      let ok=true, answered=true;
-      DATA.E.forEach((x,i)=>{
-        const v=$(`input[name="e_${i}"]:checked`).val();
-        if(!v) answered=false;
-        const good=v===x.answer;
-        if(!good) ok=false;
-        const $box=$(`[data-e="${i}"]`);
-        $box.toggleClass("correct-ring",good && !!v).toggleClass("wrong-ring",!!v && !good);
-      });
-      markSection("E",ok && answered, answered ? undefined : "Contesta las tres preguntas.");
-    }
-
-    function checkF(){
-      let ok=true, answered=true;
-      DATA.F.forEach((x,i)=>{
-        const selected=$(`[data-f="${i}"] .noun-token.selected`).map((_,el)=>$(el).attr("data-word")).get();
-        if(!selected.length) answered=false;
-        const a=selected.slice().sort().join("|");
-        const b=x.answers.slice().sort().join("|");
-        const good=a===b;
-        if(!good) ok=false;
-        $(`[data-f="${i}"]`).toggleClass("correct-ring",good && selected.length>0).toggleClass("wrong-ring",selected.length>0 && !good);
-      });
-      markSection("F",ok && answered, answered ? undefined : "Selecciona los sustantivos en todas las oraciones.");
-    }
-
-    $(function(){
-      updateVoiceStatus();
-      renderA(); renderB(); renderC(); renderD(); renderE(); renderF(); updateProgress();
-
-      // Acordeón: solo una sección abierta
-      $(".section-toggle").on("click",function(){
-        const $sec=$(this).closest(".exam-section");
-        const $panel=$sec.find(".section-panel");
-        const opening=$panel.prop("hidden");
-
-        $(".exam-section").each(function(){
-          $(this).find(".section-panel").prop("hidden",true);
-          $(this).find(".chevron").text("▸");
-        });
-
-        if(opening){
-          $panel.prop("hidden",false);
-          $sec.find(".chevron").text("▾");
+      function updateProgress() {
+        const n = completed.size
+        $('#progressText').text(`${n}/6`)
+        $('#topProgress').css('width', `${(n / 6) * 100}%`)
+        if (n === 6) {
+          $('#finalScore').text('Completaste correctamente las 6 secciones.')
+          $('#finalCard').removeClass('hidden')
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth',
+          })
+        } else {
+          $('#finalCard').addClass('hidden')
         }
-      });
+      }
 
-      $(document).on("click",".a-choice",function(){
-        const $card=$(this).closest("[data-a]");
-        const v=$(this).data("v");
-        $card.attr("data-selected",v).removeClass("correct-ring wrong-ring");
-        $card.find(".a-choice").removeClass("ring-2 ring-offset-1 ring-blue-400 ring-red-400");
-        $(this).addClass(v==="comun" ? "ring-2 ring-offset-1 ring-blue-400" : "ring-2 ring-offset-1 ring-red-400");
-        speakText($(this).text().trim());
-      });
+      function markSection(letter, ok, msg) {
+        const $sec = $(`.exam-section[data-section="${letter}"]`)
+        const $status = $sec.find('.section-status')
+        const $msg = $sec.find('.section-msg')
+        if (ok) {
+          completed.add(letter)
+          $status
+            .text('✅ Completado')
+            .removeClass('text-slate-400 text-red-600')
+            .addClass('text-emerald-600')
+          $msg
+            .text(msg || '¡Muy bien!')
+            .removeClass('text-red-600')
+            .addClass('text-emerald-600')
+        } else {
+          completed.delete(letter)
+          $status
+            .text('Revisa')
+            .removeClass('text-slate-400 text-emerald-600')
+            .addClass('text-red-600')
+          $msg
+            .text(msg || 'Hay respuestas por corregir.')
+            .removeClass('text-emerald-600')
+            .addClass('text-red-600')
+        }
+        updateProgress()
+      }
 
-      $(document).on("click",".b-choice",function(){
-        const $card=$(this).closest("[data-b]");
-        const v=$(this).data("v");
-        $card.attr("data-selected",v).removeClass("correct-ring wrong-ring");
-        $card.find(".b-choice").removeClass("ring-2 ring-offset-1 ring-pink-400 ring-blue-400");
-        $(this).addClass(v==="femenino" ? "ring-2 ring-offset-1 ring-pink-400" : "ring-2 ring-offset-1 ring-blue-400");
-        speakText($(this).text().trim());
-      });
+      function checkA() {
+        let ok = true,
+          answered = true
+        DATA.A.forEach((x, i) => {
+          const $card = $(`[data-a="${i}"]`)
+          const v = $card.attr('data-selected') || ''
+          if (!v) answered = false
+          const good = v === x.answer
+          if (!good) ok = false
+          $card
+            .toggleClass('correct-ring', good && !!v)
+            .toggleClass('wrong-ring', !!v && !good)
+        })
+        markSection(
+          'A',
+          ok && answered,
+          answered ? undefined : 'Completa todas las palabras.',
+        )
+      }
 
-      $(document).on("click",".noun-token",function(){
-        $(this).toggleClass("selected bg-sky-100 border-sky-400 text-sky-800");
-        $(this).closest("[data-f]").removeClass("correct-ring wrong-ring");
-        speakText($(this).text().trim());
-      });
+      function checkB() {
+        let ok = true,
+          answered = true
+        DATA.B.forEach((x, i) => {
+          const $card = $(`[data-b="${i}"]`)
+          const v = $card.attr('data-selected') || ''
+          if (!v) answered = false
+          const good = v === x.answer
+          if (!good) ok = false
+          $card
+            .toggleClass('correct-ring', good && !!v)
+            .toggleClass('wrong-ring', !!v && !good)
+        })
+        markSection(
+          'B',
+          ok && answered,
+          answered ? undefined : 'Completa todas las palabras.',
+        )
+      }
 
-      $(document).on("click", ".read-word", function(){
-        speakText($(this).data("say") || "");
-      });
+      function checkC() {
+        let ok = true,
+          answered = true
+        DATA.C.forEach((x, i) => {
+          const $input = $(`.c-input[data-i="${i}"]`)
+          const val = $input.val()
+          if (!String(val).trim()) answered = false
+          const good = normalizeText(val) === normalizeText(x.answer)
+          if (!good) ok = false
+          $input
+            .toggleClass('border-emerald-500 ring-2 ring-emerald-100', good)
+            .toggleClass(
+              'border-red-500 ring-2 ring-red-100',
+              !!String(val).trim() && !good,
+            )
+        })
+        markSection(
+          'C',
+          ok && answered,
+          answered ? undefined : 'Escribe todos los plurales.',
+        )
+      }
 
-      $(document).on("click", ".section-instructions", function(){
-        speakText($(this).data("speak") || "Instrucciones del ejercicio.");
-      });
+      function checkD() {
+        let ok = true,
+          answered = true
+        DATA.D.forEach((x, i) => {
+          const selected = $(`[data-d="${i}"] .uppercase-token.selected`)
+            .map((_, el) => normalizeText($(el).attr('data-word')))
+            .get()
+          if (!selected.length) answered = false
 
-      $("#btnReadInstructions").on("click", function(){
-        speakText("Completa cada sección. Solo puede haber una abierta a la vez.");
-      });
+          const expected = x.answers.map(normalizeText).sort()
+          const actual = [...new Set(selected)].sort()
+          const good =
+            expected.length === actual.length &&
+            expected.every((token, idx) => token === actual[idx])
 
-      $(".check-section").on("click",function(){
-        const s=$(this).data("check");
-        ({A:checkA,B:checkB,C:checkC,D:checkD,E:checkE,F:checkF})[s]();
-      });
+          if (!good) ok = false
+          $(`[data-d="${i}"]`)
+            .toggleClass('correct-ring', good && selected.length > 0)
+            .toggleClass('wrong-ring', selected.length > 0 && !good)
+        })
+        markSection(
+          'D',
+          ok && answered,
+          answered ? undefined : 'Selecciona las palabras con mayúscula.',
+        )
+      }
 
-      $("#btnReset").on("click",function(){
-        if(!confirm("¿Borrar todas las respuestas y comenzar de nuevo?")) return;
-        completed.clear();
-        $(".exam-section").find(".section-panel").prop("hidden",true);
-        $(".exam-section").find(".chevron").text("▸");
-        $(".exam-section").find(".section-status").text("Pendiente").attr("class","section-status text-sm font-bold text-slate-400");
-        $(".section-msg").text("").removeClass("text-red-600 text-emerald-600");
-        $("input[type=text]").val("").removeClass("border-emerald-500 border-red-500 ring-2 ring-emerald-100 ring-red-100");
-        $("input[type=radio]").prop("checked",false);
-        $("[data-selected]").removeAttr("data-selected");
-        $(".answer-card,[data-e],[data-f]").removeClass("correct-ring wrong-ring");
-        $(".a-choice,.b-choice").removeClass("ring-2 ring-offset-1 ring-blue-400 ring-red-400 ring-pink-400");
-        $(".noun-token").removeClass("selected bg-sky-100 border-sky-400 text-sky-800");
-        $(".exam-section").first().find(".section-panel").prop("hidden",false);
-        $(".exam-section").first().find(".chevron").text("▾");
-        updateProgress();
-        window.scrollTo({top:0,behavior:"smooth"});
-      });
-    });
-  </script>
-</body>
+      function checkE() {
+        let ok = true,
+          answered = true
+        DATA.E.forEach((x, i) => {
+          const v = $(`input[name="e_${i}"]:checked`).val()
+          if (!v) answered = false
+          const good = v === x.answer
+          if (!good) ok = false
+          const $box = $(`[data-e="${i}"]`)
+          $box
+            .toggleClass('correct-ring', good && !!v)
+            .toggleClass('wrong-ring', !!v && !good)
+        })
+        markSection(
+          'E',
+          ok && answered,
+          answered ? undefined : 'Contesta las tres preguntas.',
+        )
+      }
+
+      function normalizeNounToken(value) {
+        return normalizeText(value).replace(/[.,;:!?¡¿]+$/g, '')
+      }
+
+      function checkF() {
+        let ok = true,
+          answered = true
+        DATA.F.forEach((x, i) => {
+          const selected = $(`[data-f="${i}"] .noun-token.selected`)
+            .map((_, el) => normalizeNounToken($(el).attr('data-word')))
+            .get()
+          if (!selected.length) answered = false
+
+          const expected = x.answers.map(normalizeNounToken).sort()
+          const actual = [...new Set(selected)].sort()
+          const good =
+            expected.length === actual.length &&
+            expected.every((token, idx) => token === actual[idx])
+
+          if (!good) ok = false
+          $(`[data-f="${i}"]`)
+            .toggleClass('correct-ring', good && selected.length > 0)
+            .toggleClass('wrong-ring', selected.length > 0 && !good)
+        })
+        markSection(
+          'F',
+          ok && answered,
+          answered
+            ? undefined
+            : 'Selecciona los sustantivos en todas las oraciones.',
+        )
+      }
+
+      $(function () {
+        updateVoiceStatus()
+        renderA()
+        renderB()
+        renderC()
+        renderD()
+        renderE()
+        renderF()
+        updateProgress()
+
+        // Acordeón: solo una sección abierta
+        $('.section-toggle').on('click', function () {
+          const $sec = $(this).closest('.exam-section')
+          const $panel = $sec.find('.section-panel')
+          const opening = $panel.prop('hidden')
+
+          $('.exam-section').each(function () {
+            $(this).find('.section-panel').prop('hidden', true)
+            $(this).find('.chevron').text('▸')
+          })
+
+          if (opening) {
+            $panel.prop('hidden', false)
+            $sec.find('.chevron').text('▾')
+          }
+        })
+
+        $(document).on('click', '.a-choice', function () {
+          const $card = $(this).closest('[data-a]')
+          const v = $(this).data('v')
+          $card.attr('data-selected', v).removeClass('correct-ring wrong-ring')
+          $card
+            .find('.a-choice')
+            .removeClass('ring-2 ring-offset-1 ring-blue-400 ring-red-400')
+          $(this).addClass(
+            v === 'comun'
+              ? 'ring-2 ring-offset-1 ring-blue-400'
+              : 'ring-2 ring-offset-1 ring-red-400',
+          )
+          speakText($(this).text().trim())
+        })
+
+        $(document).on('click', '.b-choice', function () {
+          const $card = $(this).closest('[data-b]')
+          const v = $(this).data('v')
+          $card.attr('data-selected', v).removeClass('correct-ring wrong-ring')
+          $card
+            .find('.b-choice')
+            .removeClass('ring-2 ring-offset-1 ring-pink-400 ring-blue-400')
+          $(this).addClass(
+            v === 'femenino'
+              ? 'ring-2 ring-offset-1 ring-pink-400'
+              : 'ring-2 ring-offset-1 ring-blue-400',
+          )
+          speakText($(this).text().trim())
+        })
+
+        $(document).on('click', '.noun-token', function () {
+          $(this).toggleClass('selected bg-sky-100 border-sky-400 text-sky-800')
+          $(this).closest('[data-f]').removeClass('correct-ring wrong-ring')
+          speakText($(this).text().trim())
+        })
+
+        $(document).on('click', '.uppercase-token', function () {
+          $(this).toggleClass(
+            'selected bg-amber-100 border-amber-400 text-amber-800',
+          )
+          $(this).closest('[data-d]').removeClass('correct-ring wrong-ring')
+          speakText($(this).text().trim())
+        })
+
+        $(document).on('click', '.read-word', function () {
+          speakText($(this).data('say') || '')
+        })
+
+        $(document).on('click', '.section-instructions', function () {
+          speakText($(this).data('speak') || 'Instrucciones del ejercicio.')
+        })
+
+        $('#btnReadInstructions').on('click', function () {
+          speakText(
+            'Completa cada sección. Solo puede haber una abierta a la vez.',
+          )
+        })
+
+        $('.check-section').on('click', function () {
+          const s = $(this).data('check')
+          ;({
+            A: checkA,
+            B: checkB,
+            C: checkC,
+            D: checkD,
+            E: checkE,
+            F: checkF,
+          })[s]()
+        })
+
+        $('#btnReset').on('click', function () {
+          if (!confirm('¿Borrar todas las respuestas y comenzar de nuevo?'))
+            return
+          completed.clear()
+          $('.exam-section').find('.section-panel').prop('hidden', true)
+          $('.exam-section').find('.chevron').text('▸')
+          $('.exam-section')
+            .find('.section-status')
+            .text('Pendiente')
+            .attr('class', 'section-status text-sm font-bold text-slate-400')
+          $('.section-msg')
+            .text('')
+            .removeClass('text-red-600 text-emerald-600')
+          $('input[type=text]')
+            .val('')
+            .removeClass(
+              'border-emerald-500 border-red-500 ring-2 ring-emerald-100 ring-red-100',
+            )
+          $('input[type=radio]').prop('checked', false)
+          $('[data-selected]').removeAttr('data-selected')
+          $('.answer-card,[data-e],[data-f],[data-d]').removeClass(
+            'correct-ring wrong-ring',
+          )
+          $('.a-choice,.b-choice').removeClass(
+            'ring-2 ring-offset-1 ring-blue-400 ring-red-400 ring-pink-400',
+          )
+          $('.noun-token,.uppercase-token').removeClass(
+            'selected bg-sky-100 border-sky-400 text-sky-800 bg-amber-100 border-amber-400 text-amber-800',
+          )
+          $('.exam-section')
+            .first()
+            .find('.section-panel')
+            .prop('hidden', false)
+          $('.exam-section').first().find('.chevron').text('▾')
+          updateProgress()
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+      })
+    </script>
+  </body>
 </html>
